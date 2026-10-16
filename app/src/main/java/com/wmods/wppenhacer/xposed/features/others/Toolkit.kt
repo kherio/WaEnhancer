@@ -13,6 +13,8 @@ import com.wmods.wppenhacer.toolkit.backup.RecoverChatFlow
 import com.wmods.wppenhacer.toolkit.deleted.DeletedMessagesFlow
 import com.wmods.wppenhacer.toolkit.export.ExportChatFlow
 import com.wmods.wppenhacer.toolkit.importer.ImportChatFlow
+import com.wmods.wppenhacer.toolkit.Dlg
+import com.wmods.wppenhacer.toolkit.update.UpdateFlow
 import com.wmods.wppenhacer.xposed.core.Feature
 import com.wmods.wppenhacer.xposed.core.WppCore.homeActivityClass
 
@@ -34,6 +36,7 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
                 showHub(activity)
                 true
             }
+            announceUpdate(activity)
         }
         hookActivityResult()
     }
@@ -90,9 +93,32 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
                 },
                 Hub.Tool("💾", S.get(S.backup_menu), S.get(S.tool_backup_desc)) {
                     BackupFlow(activity).start()
+                },
+                Hub.Tool("⬇", S.get(S.update_menu), S.get(S.tool_update_desc)) {
+                    UpdateFlow(activity).start()
                 }
             )
         )
+    }
+
+    /** Tras actualizar el módulo, avisa una vez de la nueva versión. */
+    private fun announceUpdate(activity: Activity) {
+        if (announced) return
+        announced = true
+        try {
+            val prefs = activity.getSharedPreferences("watoolkit", android.content.Context.MODE_PRIVATE)
+            val last = prefs.getString("last_version", null)
+            prefs.edit().putString("last_version", BuildConfig.VERSION_NAME).apply()
+            if (last != null && last != BuildConfig.VERSION_NAME) {
+                activity.runOnUiThread {
+                    Dlg(activity).setTitle(S.get(S.update_after_title))
+                        .setMessage(S.get(S.update_after_msg, BuildConfig.VERSION_NAME, last))
+                        .setPositiveButton(S.get(S.deleted_close), null).show()
+                }
+            }
+        } catch (t: Throwable) {
+            Host.log(t)
+        }
     }
 
     private fun openPicker(activity: Activity) {
@@ -121,5 +147,6 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
     private companion object {
         const val REQUEST_PICK_FILE = 0x5A17
         const val MENU_ID = 0x5A18
+        @Volatile var announced = false
     }
 }
