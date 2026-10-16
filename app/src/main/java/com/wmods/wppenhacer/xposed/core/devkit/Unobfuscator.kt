@@ -2873,41 +2873,104 @@ object Unobfuscator {
      * Se localiza por su forma (usa el número 3, recibe (su clase, Set) y llama al método sin
      * parámetros que devuelve el Set de chats fijados de la misma clase que el de loadPinnedHashSetMethod).
      */
+    private fun findPinnedUpsellCheck(classLoader: ClassLoader): Pair<MethodData, Method> {
+        val pinnedClassName = loadPinnedHashSetMethod(classLoader).declaringClass.name
+        val candidates = bridge.findMethod {
+            matcher {
+                paramCount = 2
+                paramTypes(null, "java.util.Set")
+                returnType(Boolean::class.java)
+                usingNumbers(3)
+            }
+        }
+        for (candidate in candidates) {
+            val method = try {
+                candidate.getMethodInstance(classLoader)
+            } catch (_: Throwable) {
+                continue
+            }
+            if (!Modifier.isStatic(method.modifiers)) continue
+            if (method.parameterTypes[0] != method.declaringClass) continue
+            val callsPinnedSet = candidate.invokes.any { invoke ->
+                if (!invoke.isMethod) return@any false
+                val called = try {
+                    invoke.getMethodInstance(classLoader)
+                } catch (_: Throwable) {
+                    return@any false
+                }
+                called.declaringClass.name == pinnedClassName &&
+                    called.parameterCount == 0 &&
+                    Set::class.java.isAssignableFrom(called.returnType)
+            }
+            if (callsPinnedSet) return candidate to method
+        }
+        throw NoSuchMethodException("PinnedUpsellCheck method not found")
+    }
+
+    /**
+     * Comprobación del aviso "Solo puedes fijar 3 chats" (WhatsApp Plus, WhatsApp 2.26.39+):
+     * método estático (self, Set<seleccionados>) -> Boolean que devuelve true si, al fijar los
+     * chats seleccionados, se superan 3 y hay que mostrar la oferta de suscripción.
+     */
     @Throws(Exception::class)
     @JvmStatic
     fun loadPinnedUpsellCheckMethod(classLoader: ClassLoader): Method {
         return UnobfuscatorCache.getInstance().getMethod(classLoader) {
-            val pinnedClassName = loadPinnedHashSetMethod(classLoader).declaringClass.name
-            val candidates = bridge.findMethod {
-                matcher {
-                    paramCount = 2
-                    paramTypes(null, "java.util.Set")
-                    returnType(Boolean::class.java)
-                    usingNumbers(3)
-                }
-            }
-            for (candidate in candidates) {
-                val method = try {
-                    candidate.getMethodInstance(classLoader)
+            findPinnedUpsellCheck(classLoader).second
+        }
+    }
+
+    /**
+     * Rutina que fija los chats seleccionados ("ConversationPinHelper/pinSelectedJids"). En
+     * WhatsApp 2.26.39+ el máximo (3, o 20 con WhatsApp Plus) es una constante dentro de ella.
+     */
+    @Throws(Exception::class)
+    @JvmStatic
+    fun loadPinHelperMethod(classLoader: ClassLoader): Method {
+        return UnobfuscatorCache.getInstance().getMethod(classLoader) {
+            findFirstMethodUsingStrings(
+                classLoader,
+                StringMatchType.Contains,
+                "ConversationPinHelper/pinSelectedJids max="
+            ) ?: throw NoSuchMethodException("PinHelper method not found")
+        }
+    }
+
+    /**
+     * Implementaciones de "¿el usuario tiene WhatsApp Plus?". Es la primera llamada a un método
+     * booleano de interfaz sin parámetros dentro de la comprobación del aviso de Plus.
+     */
+    @Throws(Exception::class)
+    @JvmStatic
+    fun loadPremiumCheckMethods(classLoader: ClassLoader): Array<Method> {
+        return UnobfuscatorCache.getInstance().getMethods(classLoader) {
+            val (data, _) = findPinnedUpsellCheck(classLoader)
+            for (invoke in data.invokes) {
+                if (!invoke.isMethod) continue
+                val called = try {
+                    invoke.getMethodInstance(classLoader)
                 } catch (_: Throwable) {
                     continue
                 }
-                if (!Modifier.isStatic(method.modifiers)) continue
-                if (method.parameterTypes[0] != method.declaringClass) continue
-                val callsPinnedSet = candidate.invokes.any { invoke ->
-                    if (!invoke.isMethod) return@any false
-                    val called = try {
-                        invoke.getMethodInstance(classLoader)
-                    } catch (_: Throwable) {
-                        return@any false
-                    }
-                    called.declaringClass.name == pinnedClassName &&
-                        called.parameterCount == 0 &&
-                        Set::class.java.isAssignableFrom(called.returnType)
+                if (!called.declaringClass.isInterface || called.parameterCount != 0 ||
+                    called.returnType != Boolean::class.javaPrimitiveType
+                ) continue
+                val list = ArrayList<Method>()
+                val implementations = bridge.findClass {
+                    matcher { addInterface(called.declaringClass.name) }
                 }
-                if (callsPinnedSet) return@getMethod method
+                for (impl in implementations) {
+                    val clazz = impl.getInstance(classLoader)
+                    for (m in clazz.declaredMethods) {
+                        if (m.name == called.name && m.parameterCount == 0 &&
+                            m.returnType == Boolean::class.javaPrimitiveType
+                        ) list.add(m)
+                    }
+                }
+                if (list.isEmpty()) throw NoSuchMethodException("Premium check implementations not found")
+                return@getMethods list.toTypedArray()
             }
-            throw NoSuchMethodException("PinnedUpsellCheck method not found")
+            throw NoSuchMethodException("Premium check method not found")
         }
     }
 

@@ -111,6 +111,33 @@ class PinnedLimit(
             logDebug(t)
         }
 
+        // WhatsApp 2.26.39+: el máximo es una constante (3, o 20 con Plus) dentro de la rutina que fija
+        // los chats. Mientras se ejecuta, la comprobación "¿tiene Plus?" responde que sí, de modo que
+        // se aplica el máximo de 20 y no el de 3.
+        try {
+            val pinHelper = Unobfuscator.loadPinHelperMethod(classLoader)
+            logDebug("[Pinned Limit] pinHelper", pinHelper)
+            val premiumChecks = Unobfuscator.loadPremiumCheckMethods(classLoader)
+            premiumChecks.forEach { logDebug("[Pinned Limit] premiumCheck", it) }
+            val inPinHelper = ThreadLocal<Boolean>()
+            pinHelper.hook {
+                before { inPinHelper.set(true) }
+                after { inPinHelper.set(false) }
+            }
+            premiumChecks.forEach { check ->
+                check.hook {
+                    before {
+                        if (inPinHelper.get() == true) {
+                            logOnce("premiumCheck")
+                            result = true
+                        }
+                    }
+                }
+            }
+        } catch (t: Throwable) {
+            logDebug(t)
+        }
+
         val pinnedFilterMethod = Unobfuscator.loadPinnedFilterMethod(classLoader)
         logDebug("[Pinned Limit] filter", pinnedFilterMethod)
         pinnedFilterMethod.hook {
