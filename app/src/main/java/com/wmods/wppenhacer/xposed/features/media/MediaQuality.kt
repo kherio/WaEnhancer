@@ -10,8 +10,6 @@ import com.wmods.wppenhacer.xposed.core.Feature
 import com.wmods.wppenhacer.xposed.core.devkit.Unobfuscator
 import com.wmods.wppenhacer.xposed.core.devkit.UnobfuscatorCache
 import com.wmods.wppenhacer.xposed.features.general.Others
-import com.wmods.wppenhacer.xposed.utils.ReflectionUtils
-import java.lang.reflect.Field
 
 class MediaQuality(loader: ClassLoader, preferences: SharedPreferences) :
     Feature(loader, preferences) {
