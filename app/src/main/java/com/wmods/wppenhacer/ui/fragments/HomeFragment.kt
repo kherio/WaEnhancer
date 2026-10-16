@@ -120,7 +120,7 @@ class HomeFragment : BaseFragment() {
 
         binding.updateCard.setOnClickListener { view ->
             animateClick(view)
-            Utils.openLink(requireActivity(), "https://t.me/waenhancher")
+            Utils.openLink(requireActivity(), "https://github.com/kherio/WaToolkit/releases/latest")
         }
 
         binding.diagBtn.setOnClickListener { view ->
@@ -505,7 +505,7 @@ class HomeFragment : BaseFragment() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("https://api.github.com/repos/kherio/WaEnhancer/releases/latest")
+                    .url("https://api.github.com/repos/kherio/WaToolkit/releases/latest")
                     .build()
 
                 client.newCall(request).execute().use { response ->
