@@ -2866,6 +2866,51 @@ object Unobfuscator {
         }
     }
 
+    /**
+     * Comprobación del aviso "Solo puedes fijar 3 chats" (WhatsApp Plus, WhatsApp 2.26.39+):
+     * método estático (self, Set<seleccionados>) -> Boolean que devuelve true si, al fijar los
+     * chats seleccionados, se superan 3 y hay que mostrar la oferta de suscripción.
+     * Se localiza por su forma (usa el número 3, recibe (su clase, Set) y llama al método sin
+     * parámetros que devuelve el Set de chats fijados de la misma clase que el de loadPinnedHashSetMethod).
+     */
+    @Throws(Exception::class)
+    @JvmStatic
+    fun loadPinnedUpsellCheckMethod(classLoader: ClassLoader): Method {
+        return UnobfuscatorCache.getInstance().getMethod(classLoader) {
+            val pinnedClassName = loadPinnedHashSetMethod(classLoader).declaringClass.name
+            val candidates = bridge.findMethod {
+                matcher {
+                    paramCount = 2
+                    paramTypes(null, "java.util.Set")
+                    returnType(Boolean::class.java)
+                    usingNumbers(3)
+                }
+            }
+            for (candidate in candidates) {
+                val method = try {
+                    candidate.getMethodInstance(classLoader)
+                } catch (_: Throwable) {
+                    continue
+                }
+                if (!Modifier.isStatic(method.modifiers)) continue
+                if (method.parameterTypes[0] != method.declaringClass) continue
+                val callsPinnedSet = candidate.invokes.any { invoke ->
+                    if (!invoke.isMethod) return@any false
+                    val called = try {
+                        invoke.getMethodInstance(classLoader)
+                    } catch (_: Throwable) {
+                        return@any false
+                    }
+                    called.declaringClass.name == pinnedClassName &&
+                        called.parameterCount == 0 &&
+                        Set::class.java.isAssignableFrom(called.returnType)
+                }
+                if (callsPinnedSet) return@getMethod method
+            }
+            throw NoSuchMethodException("PinnedUpsellCheck method not found")
+        }
+    }
+
     @Throws(Exception::class)
     @JvmStatic
     fun loadSetPinnedLimitMethod(classLoader: ClassLoader): Method {

@@ -96,6 +96,21 @@ class PinnedLimit(
             }
         }
 
+        // WhatsApp 2.26.39+: aviso de WhatsApp Plus al fijar más de 3 chats. Se anula la comprobación
+        // para que el chat se fije igualmente. Si no se encuentra, el resto de la función sigue activa.
+        try {
+            val upsellCheckMethod = Unobfuscator.loadPinnedUpsellCheckMethod(classLoader)
+            logDebug("[Pinned Limit] upsellCheck", upsellCheckMethod)
+            upsellCheckMethod.hook {
+                replaceAny {
+                    logOnce("upsellCheck")
+                    false
+                }
+            }
+        } catch (t: Throwable) {
+            logDebug(t)
+        }
+
         val pinnedFilterMethod = Unobfuscator.loadPinnedFilterMethod(classLoader)
         logDebug("[Pinned Limit] filter", pinnedFilterMethod)
         pinnedFilterMethod.hook {
