@@ -14,6 +14,13 @@ val gitHash: String = providers.exec {
     isIgnoreExitValue = true
 }.standardOutput.asText.map { it.trim().uppercase(Locale.getDefault()).substring(0,8) }.getOrElse("UNKNOWN")
 
+// Versión base. Las releases automáticas suben el último número (1.6.1 -> 1.6.2 ...) pasando -PappVersion.
+val baseVersion = "1.6.1"
+val appVersion: String = (project.findProperty("appVersion") as String?)?.takeIf { it.isNotBlank() } ?: baseVersion
+val appVersionCode: Int = appVersion.split(".").map { it.toIntOrNull() ?: 0 }.let { p ->
+    p.getOrElse(0) { 0 } * 10000 + p.getOrElse(1) { 0 } * 100 + p.getOrElse(2) { 0 }
+}
+
 android {
     namespace = "com.wmods.wppenhacer"
     //noinspection GradleDependency
@@ -40,8 +47,8 @@ android {
         minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 34
-        versionCode = 161
-        versionName = "1.6.1 ($gitHash)"
+        versionCode = appVersionCode
+        versionName = "$appVersion ($gitHash)"
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
