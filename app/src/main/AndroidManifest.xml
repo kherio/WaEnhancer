@@ -71,6 +71,10 @@
         </activity>
 
         <activity
+            android:name=".activities.ToolsActivity"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".activities.AboutActivity"
             android:theme="@style/AppTheme" />
 
