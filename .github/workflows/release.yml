@@ -2,15 +2,14 @@ name: Release
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
 
 jobs:
   release:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    env:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -64,25 +63,3 @@ jobs:
             app/build/outputs/apk/whatsapp/debug/WaToolkit*.apk
             app/build/outputs/apk/business/debug/WaToolkit-Business*.apk
           tag_name: ${{ steps.vars.outputs.tag }}
-
-      - name: Read changelog
-        id: changelog
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const fs = require('fs');
-            const changelog = fs.readFileSync('changelog.txt', 'utf8').trim();
-            core.setOutput('content', changelog);
-
-      - name: Post to Telegram channel
-        if: ${{ env.BOT_TOKEN != '' }}
-        uses: Dev4Mod/telegram-github-action@master
-        with:
-          to: ${{ env.CHANNEL_ID }}
-          token: ${{ env.BOT_TOKEN }}
-          format: markdown
-          disable_web_page_preview: true
-          message: |
-            ${{ steps.changelog.outputs.content }}
-
-            Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.vars.outputs.tag }}
