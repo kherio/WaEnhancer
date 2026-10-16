@@ -7,7 +7,6 @@ import android.provider.DocumentsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout

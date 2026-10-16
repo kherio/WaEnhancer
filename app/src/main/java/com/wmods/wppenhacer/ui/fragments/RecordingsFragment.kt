@@ -33,7 +33,6 @@ class RecordingsFragment : Fragment(), RecordingsAdapter.OnRecordingActionListen
 
     private lateinit var adapter: RecordingsAdapter
     private val allRecordings = ArrayList<Recording>()
-    private var isGroupByContact = false
     private var currentSortType = 1 // 1=date, 2=name, 3=duration, 4=contact
 
     override fun onCreateView(

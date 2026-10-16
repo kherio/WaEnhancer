@@ -35,9 +35,7 @@ import org.luckypray.dexkit.query.enums.StringMatchType
 import java.io.File
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.Collections
 import java.util.Properties
-import java.util.WeakHashMap
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
@@ -54,8 +52,6 @@ class Others(loader: ClassLoader, preferences: SharedPreferences) : Feature(load
     }
 
     private lateinit var properties: Properties
-    private val hiddenHomeFilterViews =
-        Collections.synchronizedMap(WeakHashMap<View, Boolean>())
 
     override fun doHook() {
         properties = Utils.getProperties(xprefs, "custom_css", "custom_filters")

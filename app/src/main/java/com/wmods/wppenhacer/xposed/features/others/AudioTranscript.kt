@@ -383,7 +383,6 @@ class AudioTranscript(
         private const val STATUS_COMPLETED = "completed"
         private const val STATUS_ERROR = "error"
 
-        private const val TOAST_SHORT = 1
         private const val DEFAULT_CONFIDENCE = 100
         private const val INDEX_NOT_FOUND = -1
         private const val ON_COMPLETE_PARAMETER_COUNT = 4
