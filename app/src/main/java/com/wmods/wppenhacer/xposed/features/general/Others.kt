@@ -352,6 +352,7 @@ class Others(loader: ClassLoader, preferences: SharedPreferences) : Feature(load
                 before {
                     val enumParam = args[0] as Enum<*>
                     if (enumParam.name == "WAMO") {
+                        @Suppress("UNCHECKED_CAST")
                         val retClass = (method as Method).returnType as Class<out Enum<*>>
                         val pauseEnum = java.lang.Enum.valueOf(retClass, "PAUSED")
                         result = pauseEnum
@@ -561,7 +562,9 @@ class Others(loader: ClassLoader, preferences: SharedPreferences) : Feature(load
             before {
                 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                 val collection = args.last() as java.util.Collection<*>
-                args[args.lastIndex] = object : ArrayList<Any>(collection as Collection<Any>) {
+                @Suppress("UNCHECKED_CAST")
+                val safeCollection = collection as Collection<Any>
+                args[args.lastIndex] = object : ArrayList<Any>(safeCollection) {
                     override val size: Int
                         get() = 1
                 }

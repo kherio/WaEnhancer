@@ -97,6 +97,7 @@ object DrawableColors {
 
             is DrawableContainer -> {
                 val state = drawable.constantState!!
+                @Suppress("UNCHECKED_CAST")
                 val children =
                     ReflectionUtils.getObjectField(state, "mDrawables") as Array<Drawable?>
                 children.forEach { replaceColor(it, colors) }

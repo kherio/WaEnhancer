@@ -123,7 +123,7 @@ class ThemePreference(context: Context, attrs: AttributeSet?) : Preference(conte
                     val intent = Intent(currentContext, TextEditorActivity::class.java)
                         .putExtra("folder_name", folder)
                         .putExtra("key", key)
-                    ContextCompat.startActivity(currentContext, intent, null)
+                    currentContext.startActivity(intent)
                 }
             }
             folderListContainer.addView(itemView)

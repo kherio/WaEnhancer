@@ -233,7 +233,7 @@ afterEvaluate {
                             "shell",
                             "am",
                             "force-stop",
-                            project.properties["debug_package_name"]?.toString()
+                            project.findProperty("debug_package_name")?.toString()
                         )
                     }
                     delay(3000.milliseconds)
@@ -244,7 +244,7 @@ afterEvaluate {
                             "am",
                             "start",
                             "-n",
-                            "$(cmd package resolve-activity --brief ${project.properties["debug_package_name"]} | tail -n 1)"
+                            "$(cmd package resolve-activity --brief ${project.findProperty("debug_package_name")} | tail -n 1)"
                         )
                     }
                 }
