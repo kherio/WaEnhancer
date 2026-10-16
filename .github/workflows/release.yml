@@ -5,6 +5,10 @@ on:
   push:
     branches: [master]
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     permissions:
@@ -29,8 +33,17 @@ jobs:
 
       - name: Get version and SHA
         id: vars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(grep 'versionName' app/build.gradle.kts | sed -n 's/.*versionName = "\([^ ]*\).*/\1/p')
+          BASE=$(sed -n 's/^val baseVersion = "\([^"]*\)".*/\1/p' app/build.gradle.kts)
+          LATEST=$(gh api "repos/${{ github.repository }}/releases/latest" --jq .tag_name 2>/dev/null | cut -d- -f1 || true)
+          VERSION=$BASE
+          if [ -n "$LATEST" ]; then
+            NEXT="${LATEST%.*}.$(( ${LATEST##*.} + 1 ))"
+            # Se usa la mayor entre la versión base del código y la siguiente a la última release
+            VERSION=$(printf '%s\n%s\n' "$BASE" "$NEXT" | sort -V | tail -n 1)
+          fi
           SHA8=$(git rev-parse --short=8 HEAD)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$VERSION-$SHA8" >> $GITHUB_OUTPUT
@@ -51,7 +64,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build all variants
-        run: ./gradlew assembleWhatsappDebug assembleBusinessDebug -Pminify=true
+        run: ./gradlew assembleWhatsappDebug assembleBusinessDebug -Pminify=true -PappVersion=${{ steps.vars.outputs.version }}
 
       - name: Upload to GitHub release
         uses: softprops/action-gh-release@v3
