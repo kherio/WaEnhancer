@@ -48,6 +48,7 @@ class DeleteStatus(classLoader: ClassLoader, preferences: SharedPreferences) :
                                 activity.finish()
                             } else {
                                 activity.recreate()
+                                @Suppress("DEPRECATION")
                                 activity.overridePendingTransition(
                                     android.R.anim.fade_in,
                                     android.R.anim.fade_out

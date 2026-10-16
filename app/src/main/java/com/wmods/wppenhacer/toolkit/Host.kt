@@ -41,6 +41,7 @@ object Host {
     fun rootWhatsAppDir(context: Context): File {
         val app = context.applicationContext
         val appName = app.packageManager.getApplicationLabel(app.applicationInfo).toString()
+        @Suppress("DEPRECATION")
         val mediaDirs = app.externalMediaDirs
         if (mediaDirs.isNotEmpty() && mediaDirs[0] != null) {
             val root = File(mediaDirs[0], appName)

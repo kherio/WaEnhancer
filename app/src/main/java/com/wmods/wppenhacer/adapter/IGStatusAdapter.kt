@@ -215,7 +215,7 @@ class IGStatusAdapter(context: Context, private val statusInfoClazz: Class<*>) :
                         ?: ReflectionUtils.getObjectField(item, "A02")
 
                 val classJid = findFirstClassUsingName(
-                    statusInfoClazz.classLoader,
+                    statusInfoClazz.classLoader!!,
                     StringMatchType.EndsWith,
                     "jid.Jid"
                 )

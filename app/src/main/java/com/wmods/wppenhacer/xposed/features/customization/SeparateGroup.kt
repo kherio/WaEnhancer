@@ -384,6 +384,7 @@ class SeparateGroup(loader: ClassLoader, preferences: SharedPreferences) :
 
         onCreateTabList.hook {
             after {
+                @Suppress("UNCHECKED_CAST")
                 val updatedTabs = result as? ArrayList<Int> ?: return@after
                 if (!updatedTabs.contains(GROUPS)) {
                     updatedTabs.add(if (updatedTabs.isEmpty()) 0 else 1, GROUPS)

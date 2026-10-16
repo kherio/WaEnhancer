@@ -167,7 +167,7 @@ class WaContactWpp(instance: Any?) {
             val instance = mInstanceGetProfilePhoto
             val method = getProfilePhoto
             val target = mInstance
-            if (instance != null && method != null && target != null) {
+            if (instance != null && method != null) {
                 val args = method.parameterTypes.map { type ->
                     when {
                         type == Boolean::class.javaPrimitiveType -> fullImage
