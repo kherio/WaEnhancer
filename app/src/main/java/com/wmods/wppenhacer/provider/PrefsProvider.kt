@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceManager
+import com.wmods.wppenhacer.toolkit.ToolRequest
 import com.wmods.wppenhacer.xposed.bridge.service.CallerGuard
 
 class PrefsProvider : ContentProvider() {
@@ -13,8 +14,13 @@ class PrefsProvider : ContentProvider() {
     override fun onCreate(): Boolean = true
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
-        if (method != METHOD_GET_ALL) return null
         val context = context ?: return null
+        if (method == METHOD_TAKE_PENDING_TOOL) {
+            if (arg == null || !CallerGuard.isCallerAllowed(context)) return null
+            val tool = ToolRequest.take(context, arg) ?: return null
+            return Bundle().apply { putString(KEY_TOOL, tool) }
+        }
+        if (method != METHOD_GET_ALL) return null
         // Provider exportado: solo el módulo y WhatsApp/WhatsApp Business pueden leer
         // las preferencias (incluyen claves de API de transcripción).
         if (!CallerGuard.isCallerAllowed(context)) return null
@@ -61,6 +67,8 @@ class PrefsProvider : ContentProvider() {
 
     companion object {
         const val METHOD_GET_ALL = "getAll"
+        const val METHOD_TAKE_PENDING_TOOL = "takePendingTool"
+        const val KEY_TOOL = "tool"
         const val KEY_VALUES = "values"
         const val KEY_SETS = "sets"
     }

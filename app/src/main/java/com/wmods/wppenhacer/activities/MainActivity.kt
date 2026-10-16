@@ -217,6 +217,11 @@ class MainActivity : BaseActivity() {
                 return true
             }
 
+            R.id.menu_toolkit -> {
+                startActivity(Intent(this, ToolsActivity::class.java))
+                return true
+            }
+
             R.id.menu_about -> {
                 val options = ActivityOptionsCompat.makeCustomAnimation(
                     this,

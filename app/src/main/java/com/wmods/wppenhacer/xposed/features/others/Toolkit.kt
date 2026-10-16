@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.wmods.wppenhacer.BuildConfig
+import androidx.core.net.toUri
+import com.wmods.wppenhacer.provider.PrefsProvider
+import com.wmods.wppenhacer.toolkit.ToolRequest
 import com.wmods.wppenhacer.toolkit.Hub
 import com.wmods.wppenhacer.toolkit.Host
 import com.wmods.wppenhacer.toolkit.S
@@ -39,6 +42,46 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
             announceUpdate(activity)
         }
         hookActivityResult()
+        hookPendingTool()
+    }
+
+    /** Cuando se abre la pantalla principal, atiende la herramienta pedida desde la app del módulo. */
+    private fun hookPendingTool() {
+        homeActivityClass.resolve().firstMethod {
+            name = "onResume"
+            superclass()
+        }.hook {
+            after {
+                val activity = instance as? Activity ?: return@after
+                if (!homeActivityClass.isInstance(activity)) return@after
+                Thread {
+                    try {
+                        val uri = "content://${BuildConfig.APPLICATION_ID}.preferences".toUri()
+                        val tool = activity.contentResolver
+                            .call(uri, PrefsProvider.METHOD_TAKE_PENDING_TOOL, activity.packageName, null)
+                            ?.getString(PrefsProvider.KEY_TOOL)
+                        if (tool != null) activity.runOnUiThread { runTool(activity, tool) }
+                    } catch (t: Throwable) {
+                        Host.log(t)
+                    }
+                }.start()
+            }
+        }
+    }
+
+    private fun runTool(activity: Activity, tool: String) {
+        try {
+            when (tool) {
+                ToolRequest.IMPORT -> openPicker(activity)
+                ToolRequest.EXPORT -> ExportChatFlow(activity).start()
+                ToolRequest.DELETED -> DeletedMessagesFlow(activity).start()
+                ToolRequest.RECOVER -> RecoverChatFlow(activity).start()
+                ToolRequest.BACKUP -> BackupFlow(activity).start()
+            }
+        } catch (t: Throwable) {
+            Host.log(t)
+            Host.toast(activity, t.message)
+        }
     }
 
     private fun hookActivityResult() {
