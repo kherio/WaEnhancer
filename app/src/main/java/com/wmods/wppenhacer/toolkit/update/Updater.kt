@@ -4,9 +4,9 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Consulta la última release de GitHub (kherio/WaEnhancer) y compara versiones. */
+/** Consulta la última release de GitHub (kherio/WaToolkit) y compara versiones. */
 object Updater {
-    const val LATEST_URL = "https://api.github.com/repos/kherio/WaEnhancer/releases/latest"
+    const val LATEST_URL = "https://api.github.com/repos/kherio/WaToolkit/releases/latest"
 
     class Release(val version: String, val apkUrl: String, val apkName: String)
 

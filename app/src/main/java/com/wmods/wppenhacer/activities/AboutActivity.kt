@@ -37,8 +37,9 @@ class AboutActivity : BaseActivity() {
         val binding = ActivityAboutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnTelegram.setOnClickListener { openUrl("https://t.me/waenhancer") }
-        binding.btnGithub.setOnClickListener { openUrl("https://github.com/kherio/WaEnhancer") }
+        // El grupo de Telegram es de Dev4Mod: el botón se oculta.
+        binding.btnTelegram.visibility = android.view.View.GONE
+        binding.btnGithub.setOnClickListener { openUrl("https://github.com/kherio/WaToolkit") }
 
         val contributorTopMargin = resources.getDimensionPixelSize(R.dimen.spacing_small)
         contributors.forEachIndexed { index, contributor ->
