@@ -22,12 +22,21 @@ class PinnedLimit(
         if (!xprefs.getBoolean(PINNED_LIMIT_PREF_KEY, false)) return
 
         val pinnedHashSetMethod = Unobfuscator.loadPinnedHashSetMethod(classLoader)
-        Unobfuscator.loadPinnedInChatMethod(classLoader).hook {
-            replaceAny { PINNED_LIMIT_ENABLED }
+        logDebug("[Pinned Limit] hashSet", pinnedHashSetMethod)
+        val pinnedInChatMethod = Unobfuscator.loadPinnedInChatMethod(classLoader)
+        logDebug("[Pinned Limit] inChat", pinnedInChatMethod)
+        pinnedInChatMethod.hook {
+            replaceAny {
+                logOnce("inChat")
+                PINNED_LIMIT_ENABLED
+            }
         }
 
-        Unobfuscator.loadSetPinnedLimitMethod(classLoader).hook {
+        val setPinnedLimitMethod = Unobfuscator.loadSetPinnedLimitMethod(classLoader)
+        logDebug("[Pinned Limit] setPinnedLimit", setPinnedLimitMethod)
+        setPinnedLimitMethod.hook {
             before {
+                logOnce("setPinnedLimit")
                 if (ReflectionUtils.isCalledFromStrings(SYNC_RESPONSE_HANDLER_CLASS_NAME)) {
                     result = null
                 }
@@ -57,6 +66,7 @@ class PinnedLimit(
         }
         pinnedHashSetMethod.hook {
             after {
+                logOnce("hashSet")
                 val map = result as Map<Any?, Any?>
                 val thisObject = instanceOrNull ?: args[0]!!
                 val pinnedMap = if (map is PinnedLinkedHashMap<*>) {
@@ -86,8 +96,11 @@ class PinnedLimit(
             }
         }
 
-        Unobfuscator.loadPinnedFilterMethod(classLoader).hook {
+        val pinnedFilterMethod = Unobfuscator.loadPinnedFilterMethod(classLoader)
+        logDebug("[Pinned Limit] filter", pinnedFilterMethod)
+        pinnedFilterMethod.hook {
             after {
+                logOnce("filter")
                 if (args[0] !is PinnedLinkedHashMap.PinnedKeySet<*>) {
                     return@after
                 }
@@ -109,6 +122,13 @@ class PinnedLimit(
     }
 
     override fun getPluginName(): String = "Pinned Limit"
+
+    private val firedHooks = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
+    /** Registra una sola vez que un gancho se ha ejecutado (ayuda a diagnosticar versiones nuevas de WhatsApp). */
+    private fun logOnce(name: String) {
+        if (firedHooks.add(name)) logDebug("[Pinned Limit] hook fired: $name")
+    }
 
     private fun getPinnedLimit(): Int {
         return if (xprefs.getBoolean(PINNED_LIMIT_PREF_KEY, false)) {
