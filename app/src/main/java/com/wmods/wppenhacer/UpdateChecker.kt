@@ -16,8 +16,8 @@ class UpdateChecker(private val mActivity: Activity) : Runnable {
 
     companion object {
         private const val LATEST_RELEASE_API =
-            "https://api.github.com/repos/Dev4Mod/WaEnhancer/releases/latest"
-        private const val TELEGRAM_UPDATE_URL = "https://t.me/waenhancher"
+            "https://api.github.com/repos/kherio/WaEnhancer/releases/latest"
+        private const val RELEASES_URL = "https://github.com/kherio/WaEnhancer/releases/latest"
 
         private val httpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()
@@ -47,7 +47,7 @@ class UpdateChecker(private val mActivity: Activity) : Runnable {
 
                 if (tagName.isBlank()) return
 
-                hash = tagName.split("-")[1].trim()
+                hash = tagName.split("-").getOrNull(1)?.trim().orEmpty()
                 changelog = release.optString("body", "No changelog available.").trim()
                 publishedAt = release.optString("published_at", "")
             }
@@ -97,7 +97,7 @@ class UpdateChecker(private val mActivity: Activity) : Runnable {
                 dialog.dismiss()
             }
             dialog.setPositiveButton("Update Now") { dialog, _ ->
-                Utils.openLink(mActivity, TELEGRAM_UPDATE_URL)
+                Utils.openLink(mActivity, RELEASES_URL)
                 dialog.dismiss()
             }
             dialog.show()
