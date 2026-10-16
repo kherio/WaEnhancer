@@ -199,11 +199,6 @@ object FeatureCatalog {
             general, "homescreen", "wa enhancer", "watoolkit", "open", "button"
         )
         add(
-            catalog, context, "toolkit", R.string.enable_toolkit,
-            R.string.enable_toolkit_sum, SearchableFeature.Category.GENERAL_HOMESCREEN,
-            general, "homescreen", "toolkit", "import", "export", "backup", "deleted", "recover"
-        )
-        add(
             catalog,
             context,
             "separategroups",

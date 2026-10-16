@@ -561,6 +561,4 @@
     <string name="disable_document_scanner">Disable document scanner</string>
     <string name="disable_document_scanner_sum">Disables the ML Kit document scanner in the document picker. Fixes a crash when opening it on some devices</string>
     <string name="toolkit_tab">Tools</string>
-    <string name="enable_toolkit">Tools menu</string>
-    <string name="enable_toolkit_sum">Add a Tools entry to the Home Screen menu: import and export chats, deleted messages, backups and chat recovery</string>
 </resources>
