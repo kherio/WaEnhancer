@@ -63,6 +63,14 @@ android {
             }
         }
 
+        // Clave fija para que las builds de CI se puedan instalar unas encima de otras (actualizaciones).
+        signingConfigs.create("stable") {
+            storeFile = rootProject.file("app/signing/watoolkit-debug.jks")
+            storePassword = "android"
+            keyAlias = "watoolkit"
+            keyPassword = "android"
+        }
+
         ndk {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
@@ -101,7 +109,7 @@ android {
             //noinspection NotShrinkingResources
             isShrinkResources = false
             signingConfig =
-                if (signingConfigs["config"].storeFile != null) signingConfigs["config"] else signingConfigs["debug"]
+                if (signingConfigs["config"].storeFile != null) signingConfigs["config"] else signingConfigs["stable"]
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -113,7 +121,7 @@ android {
             //noinspection NotShrinkingResources
             isShrinkResources = false
             signingConfig =
-                if (signingConfigs["config"].storeFile != null) signingConfigs["config"] else signingConfigs["debug"]
+                if (signingConfigs["config"].storeFile != null) signingConfigs["config"] else signingConfigs["stable"]
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
