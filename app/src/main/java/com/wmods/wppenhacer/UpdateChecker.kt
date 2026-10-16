@@ -16,8 +16,8 @@ class UpdateChecker(private val mActivity: Activity) : Runnable {
 
     companion object {
         private const val LATEST_RELEASE_API =
-            "https://api.github.com/repos/kherio/WaEnhancer/releases/latest"
-        private const val RELEASES_URL = "https://github.com/kherio/WaEnhancer/releases/latest"
+            "https://api.github.com/repos/kherio/WaToolkit/releases/latest"
+        private const val RELEASES_URL = "https://github.com/kherio/WaToolkit/releases/latest"
 
         private val httpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()

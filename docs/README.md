@@ -6,7 +6,7 @@
 <div align="center">
   <p><strong>WaToolkit is an Xposed module that enhances your WhatsApp experience.</strong></p>
   <p><strong>Warning:</strong> This module is intended for educational purposes only, you may have problems with your WhatsApp account, risk of banning! Use it at your own risk.</p>
-  <p>Please note that this project is currently in development, so bugs and crashes may occur. If you encounter any issues report them in our group or create an <a href="https://github.com/Dev4Mod/WaEnhancer/issues">issue</a> here.</p>
+  <p>Please note that this project is currently in development, so bugs and crashes may occur. If you encounter any issues report them by creating an <a href="https://github.com/kherio/WaToolkit/issues">issue</a> here.</p>
 </div>
 
 ---
@@ -160,12 +160,12 @@ All modifications are made dynamically in the memory of the user's own device th
 1. Ensure that your device is rooted.
 2. Install the Xposed Framework (recommend [this](https://github.com/JingMatrix/LSPosed) LPosed) on
    your device.
-3. Download the WaToolkit from the [Actions](https://github.com/kherio/WaEnhancer/actions) section.
+3. Download the WaToolkit from the [Actions](https://github.com/kherio/WaToolkit/actions) section.
 4. Install the WaToolkit APK.
 5. Enable the WaToolkit module in the Xposed Installer app.
 
 ## Support
-If you encounter any issues or have questions about WaToolkit, please [Visit Telegram](https://t.me/waenhancer).
+If you encounter any issues or have questions about WaToolkit, please [open an issue](https://github.com/kherio/WaToolkit/issues).
 
 ## License & Copyright Warning
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)** - see the [LICENSE](LICENSE) file for details.
@@ -182,13 +182,3 @@ This is a strong copyleft open-source license. Any derivative works, forks, or s
 ---
 
 **Note**: Please use WaToolkit responsibly and in compliance with the terms and conditions of the apps you are modifying. Misuse of this tool may lead to legal consequences.
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=Dev4Mod%2FWaEnhancer&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Dev4Mod/WaEnhancer&type=date&theme=dark&legend=top-left&sealed_token=b1vTkmTYcAchBg96D5ulWNcOZFMvWeja0ogdKKalbAhLtvENQuovfDbpmDQZtMgFuxyeRseQRD6nPsU9tgT5vGKWbU_1OHCsXyFPoRSDwMChEZVMCkQ14dI5m6rSPZ-iMzp_4VSp_7J5CLtEOUKP_1b2e7vbNLGh98-LMTBjsY8w3-YgoaZSDzwxzS4u" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Dev4Mod/WaEnhancer&type=date&legend=top-left&sealed_token=b1vTkmTYcAchBg96D5ulWNcOZFMvWeja0ogdKKalbAhLtvENQuovfDbpmDQZtMgFuxyeRseQRD6nPsU9tgT5vGKWbU_1OHCsXyFPoRSDwMChEZVMCkQ14dI5m6rSPZ-iMzp_4VSp_7J5CLtEOUKP_1b2e7vbNLGh98-LMTBjsY8w3-YgoaZSDzwxzS4u" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Dev4Mod/WaEnhancer&type=date&legend=top-left&sealed_token=b1vTkmTYcAchBg96D5ulWNcOZFMvWeja0ogdKKalbAhLtvENQuovfDbpmDQZtMgFuxyeRseQRD6nPsU9tgT5vGKWbU_1OHCsXyFPoRSDwMChEZVMCkQ14dI5m6rSPZ-iMzp_4VSp_7J5CLtEOUKP_1b2e7vbNLGh98-LMTBjsY8w3-YgoaZSDzwxzS4u" />
- </picture>
-</a>
