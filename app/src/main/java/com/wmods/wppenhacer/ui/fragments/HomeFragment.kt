@@ -120,7 +120,8 @@ class HomeFragment : BaseFragment() {
 
         binding.updateCard.setOnClickListener { view ->
             animateClick(view)
-            Utils.openLink(requireActivity(), "https://github.com/kherio/WaToolkit/releases/latest")
+            // Busca la última release y, si hay una nueva, la descarga e instala desde aquí.
+            com.wmods.wppenhacer.toolkit.update.UpdateFlow(requireActivity()).start()
         }
 
         binding.diagBtn.setOnClickListener { view ->

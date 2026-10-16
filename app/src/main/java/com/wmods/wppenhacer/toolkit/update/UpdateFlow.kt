@@ -1,16 +1,21 @@
 package com.wmods.wppenhacer.toolkit.update
 
 import android.app.Activity
-import android.app.DownloadManager
-import android.content.Context
+import android.content.Intent
 import android.net.Uri
-import android.os.Environment
+import android.provider.Settings
+import androidx.core.content.FileProvider
 import com.wmods.wppenhacer.BuildConfig
+import com.wmods.wppenhacer.R
 import com.wmods.wppenhacer.toolkit.Dlg
 import com.wmods.wppenhacer.toolkit.Host
 import com.wmods.wppenhacer.toolkit.S
+import java.io.File
 
-/** "Buscar actualizaciones": consulta GitHub y descarga el APK nuevo; se instala tocando la notificación. */
+/**
+ * "Buscar actualizaciones": consulta la última release en GitHub, descarga el APK desde el propio
+ * módulo y lo instala: directamente con root, o abriendo el instalador del sistema si no hay root.
+ */
 class UpdateFlow(private val activity: Activity) {
 
     private val isBusiness = BuildConfig.APPLICATION_ID.endsWith(".w4b")
@@ -45,21 +50,27 @@ class UpdateFlow(private val activity: Activity) {
     private fun download(rel: Updater.Release) {
         Host.toast(activity, S.get(S.update_downloading))
         Thread {
-            var file: java.io.File? = null
             try {
-                file = java.io.File(activity.cacheDir, rel.apkName)
+                val dir = File(activity.cacheDir, "updates").apply { mkdirs() }
+                dir.listFiles()?.forEach { it.delete() }
+                val file = File(dir, rel.apkName)
                 Updater.downloadTo(rel.apkUrl, file)
                 val res = Updater.installWithRoot(file)
-                val installed = if (res?.first == true) Updater.installedVersionWithRoot(BuildConfig.APPLICATION_ID) else null
+                if (res == null) {
+                    // Sin root: se abre el instalador del sistema con el APK ya descargado.
+                    activity.runOnUiThread { installWithSystemInstaller(file) }
+                    return@Thread
+                }
+                val installed = if (res.first) Updater.installedVersionWithRoot(BuildConfig.APPLICATION_ID) else null
+                file.delete()
                 activity.runOnUiThread {
-                    when {
-                        res == null -> manualDownload(rel)
-                        res.first && (installed == null || installed == rel.version) ->
-                            Dlg(activity).setTitle(S.get(S.update_ok_title))
-                                .setMessage(S.get(S.update_ok_msg, installed ?: rel.version))
-                                .setPositiveButton(S.get(S.update_restart)) { _, _ -> Host.restart(activity) }
-                                .setNegativeButton(activity.getString(android.R.string.cancel), null).show()
-                        else -> Dlg(activity).setTitle(S.get(S.update_fail_title))
+                    if (res.first && (installed == null || installed == rel.version)) {
+                        Dlg(activity).setTitle(S.get(S.update_ok_title))
+                            .setMessage(S.get(S.update_ok_msg, installed ?: rel.version))
+                            .setPositiveButton(S.get(S.update_restart)) { _, _ -> Host.restart(activity) }
+                            .setNegativeButton(activity.getString(android.R.string.cancel), null).show()
+                    } else {
+                        Dlg(activity).setTitle(S.get(S.update_fail_title))
                             .setMessage(S.get(S.update_fail_msg, if (res.first) "$installed ≠ ${rel.version}" else res.second.take(300)))
                             .setPositiveButton(S.get(S.deleted_close), null).show()
                     }
@@ -69,23 +80,30 @@ class UpdateFlow(private val activity: Activity) {
                 activity.runOnUiThread {
                     Host.toast(activity, S.get(S.update_error, e.message ?: e.javaClass.simpleName))
                 }
-            } finally {
-                file?.delete()
             }
         }.start()
     }
 
-    /** Sin root: se descarga con el gestor de descargas y se instala tocando la notificación. */
-    private fun manualDownload(rel: Updater.Release) {
+    /** Sin root: pide el permiso de instalar apps desconocidas si falta y abre el instalador del sistema. */
+    private fun installWithSystemInstaller(file: File) {
         try {
-            val dm = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val req = DownloadManager.Request(Uri.parse(rel.apkUrl))
-                .setTitle(rel.apkName)
-                .setMimeType("application/vnd.android.package-archive")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, rel.apkName)
-            dm.enqueue(req)
-            Host.toast(activity, S.get(S.update_started), android.widget.Toast.LENGTH_LONG)
+            if (!activity.packageManager.canRequestPackageInstalls()) {
+                Dlg(activity).setTitle(S.get(S.update_menu))
+                    .setMessage(activity.getString(R.string.update_allow_install))
+                    .setPositiveButton(activity.getString(android.R.string.ok)) { _, _ ->
+                        activity.startActivity(
+                            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}"))
+                        )
+                    }
+                    .setNegativeButton(activity.getString(android.R.string.cancel), null)
+                    .show()
+                return
+            }
+            val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.fileprovider", file)
+            val intent = Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            activity.startActivity(intent)
         } catch (e: Throwable) {
             Host.log(e)
             Host.toast(activity, S.get(S.update_error, e.message ?: e.javaClass.simpleName))

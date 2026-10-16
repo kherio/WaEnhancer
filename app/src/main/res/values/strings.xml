@@ -560,5 +560,6 @@
     <string name="no_file_picker">No file manager found on this device to pick a file.</string>
     <string name="disable_document_scanner">Disable document scanner</string>
     <string name="disable_document_scanner_sum">Disables the ML Kit document scanner in the document picker. Fixes a crash when opening it on some devices</string>
+    <string name="update_allow_install">To install updates from WaToolkit, allow \"Install unknown apps\" for this app. After enabling it, go back and check for updates again.</string>
     <string name="toolkit_tab">Tools</string>
 </resources>
