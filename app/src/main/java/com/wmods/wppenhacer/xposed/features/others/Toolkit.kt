@@ -8,7 +8,6 @@ import com.wmods.wppenhacer.BuildConfig
 import androidx.core.net.toUri
 import com.wmods.wppenhacer.provider.PrefsProvider
 import com.wmods.wppenhacer.toolkit.ToolRequest
-import com.wmods.wppenhacer.toolkit.Hub
 import com.wmods.wppenhacer.toolkit.Host
 import com.wmods.wppenhacer.toolkit.S
 import com.wmods.wppenhacer.toolkit.backup.BackupFlow
@@ -17,30 +16,20 @@ import com.wmods.wppenhacer.toolkit.deleted.DeletedMessagesFlow
 import com.wmods.wppenhacer.toolkit.export.ExportChatFlow
 import com.wmods.wppenhacer.toolkit.importer.ImportChatFlow
 import com.wmods.wppenhacer.toolkit.Dlg
-import com.wmods.wppenhacer.toolkit.update.UpdateFlow
 import com.wmods.wppenhacer.xposed.core.Feature
 import com.wmods.wppenhacer.xposed.core.WppCore.homeActivityClass
 
 /**
- * Herramientas de WaToolkit (importar/exportar chats, mensajes borrados, copias): añade "Tools"/"Herramientas" al menú de la pantalla principal con
- * las herramientas de importar/exportar chats, mensajes borrados y copias de seguridad.
- *
- * Se activa con el ajuste "toolkit" (por defecto activado).
+ * Herramientas de WaToolkit dentro de WhatsApp (importar/exportar chats, mensajes borrados,
+ * recuperar chat y copias de seguridad). Se lanzan desde la pantalla "Herramientas" de la app del
+ * módulo, que abre WhatsApp y deja aquí la petición (ver [ToolRequest]); este hook la recoge al
+ * mostrarse la pantalla principal y recibe los resultados de los selectores de archivos.
  */
 class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
     Feature(classLoader, preferences) {
 
     @Throws(Throwable::class)
     override fun doHook() {
-        if (!xprefs.getBoolean("toolkit", true)) return
-
-        MenuHome.addMenuItem { menu, activity ->
-            menu.add(0, MENU_ID, 0, S.get(S.hub_title)).setOnMenuItemClickListener {
-                showHub(activity)
-                true
-            }
-            announceUpdate(activity)
-        }
         hookActivityResult()
         hookPendingTool()
     }
@@ -54,6 +43,7 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
             after {
                 val activity = instance as? Activity ?: return@after
                 if (!homeActivityClass.isInstance(activity)) return@after
+                announceUpdate(activity)
                 Thread {
                     try {
                         val uri = "content://${BuildConfig.APPLICATION_ID}.preferences".toUri()
@@ -120,30 +110,6 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
         }
     }
 
-    /** Menú común: cada herramienta nueva se añade aquí. */
-    private fun showHub(activity: Activity) {
-        Hub.show(
-            activity, BuildConfig.VERSION_NAME, listOf(
-                Hub.Tool("📥", S.get(S.import_chat), S.get(S.tool_import_desc)) { openPicker(activity) },
-                Hub.Tool("📤", S.get(S.export_menu), S.get(S.tool_export_desc)) {
-                    ExportChatFlow(activity).start()
-                },
-                Hub.Tool("🗑", S.get(S.deleted_menu), S.get(S.tool_deleted_desc)) {
-                    DeletedMessagesFlow(activity).start()
-                },
-                Hub.Tool("♻️", S.get(S.recover_menu), S.get(S.tool_recover_desc)) {
-                    RecoverChatFlow(activity).start()
-                },
-                Hub.Tool("💾", S.get(S.backup_menu), S.get(S.tool_backup_desc)) {
-                    BackupFlow(activity).start()
-                },
-                Hub.Tool("⬇", S.get(S.update_menu), S.get(S.tool_update_desc)) {
-                    UpdateFlow(activity).start()
-                }
-            )
-        )
-    }
-
     /** Tras actualizar el módulo, avisa una vez de la nueva versión. */
     private fun announceUpdate(activity: Activity) {
         if (announced) return
@@ -189,7 +155,6 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
 
     private companion object {
         const val REQUEST_PICK_FILE = 0x5A17
-        const val MENU_ID = 0x5A18
         @Volatile var announced = false
     }
 }
