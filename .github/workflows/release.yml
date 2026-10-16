@@ -64,7 +64,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build all variants
-        run: ./gradlew assembleWhatsappDebug assembleBusinessDebug -Pminify=true -PappVersion=${{ steps.vars.outputs.version }}
+        run: ./gradlew assembleWhatsappDebug -Pminify=true -PappVersion=${{ steps.vars.outputs.version }}
 
       - name: Upload to GitHub release
         uses: softprops/action-gh-release@v3
@@ -74,5 +74,4 @@ jobs:
           body_path: changelog.txt
           files: |
             app/build/outputs/apk/whatsapp/debug/WaToolkit*.apk
-            app/build/outputs/apk/business/debug/WaToolkit-Business*.apk
           tag_name: ${{ steps.vars.outputs.tag }}

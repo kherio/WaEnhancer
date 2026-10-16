@@ -35,11 +35,6 @@ android {
             applicationIdSuffix = ""
             isDefault = true
         }
-        create("business") {
-            dimension = "version"
-            applicationIdSuffix = ".w4b"
-            resValue("string", "app_name", "WaToolkit Business")
-        }
     }
 
     defaultConfig {
@@ -151,10 +146,7 @@ android {
 
 androidComponents {
     onVariants { variant ->
-        val appName = when (variant.flavorName) {
-            "business" -> "WaToolkit-Business"
-            else -> "WaToolkit"
-        }
+        val appName = "WaToolkit"
         variant.outputs.forEach { output ->
             output.outputFileName.set(output.versionName.map { "$appName-$it.apk" })
         }
@@ -236,7 +228,7 @@ interface InjectedExecOps {
 
 
 afterEvaluate {
-    listOf("installWhatsappDebug", "installBusinessDebug").forEach { taskName ->
+    listOf("installWhatsappDebug").forEach { taskName ->
         tasks.findByName(taskName)?.doLast {
             runCatching {
                 val injected = project.objects.newInstance<InjectedExecOps>()

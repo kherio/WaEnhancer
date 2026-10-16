@@ -1,0 +1,35 @@
+name: Watch WhatsApp
+
+# Avisa (abriendo un issue) cuando sale una versión nueva de WhatsApp, para revisar
+# que el módulo la sigue soportando. No descarga ni modifica nada.
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  watch:
+    permissions:
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Buscar la última versión de WhatsApp
+        id: wa
+        run: |
+          FEED=$(curl -fsSL -A "Mozilla/5.0" "https://www.apkmirror.com/apk/whatsapp-inc/whatsapp/feed/" || true)
+          VER=$(printf '%s' "$FEED" | grep -o -E 'WhatsApp Messenger [0-9]+(\.[0-9]+){3}' | head -n 1 | grep -o -E '[0-9]+(\.[0-9]+){3}' || true)
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Última versión detectada: ${VER:-ninguna}"
+
+      - name: Abrir issue si es una versión nueva
+        if: steps.wa.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VER: ${{ steps.wa.outputs.version }}
+        run: |
+          TITLE="Nueva versión de WhatsApp: $VER"
+          EXISTS=$(gh issue list --repo "${{ github.repository }}" --state all --search "\"$TITLE\" in:title" --json title --jq 'length')
+          if [ "$EXISTS" = "0" ]; then
+            gh issue create --repo "${{ github.repository }}" --title "$TITLE" \
+              --body "Ha salido WhatsApp $VER. Comprueba que las funciones del módulo siguen funcionando con ella y, si algo falla, adjunta el log de LSPosed/Vector."
+          fi
