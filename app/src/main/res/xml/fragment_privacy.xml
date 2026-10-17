@@ -50,6 +50,11 @@
             app:title="@string/custom_privacy_per_contact" />
 
         <rikka.material.preference.MaterialSwitchPreference
+            app:key="strip_metadata"
+            app:summary="@string/strip_metadata_sum"
+            app:title="@string/strip_metadata" />
+
+        <rikka.material.preference.MaterialSwitchPreference
             app:key="secure_chats"
             app:summary="@string/secure_chats_sum"
             app:title="@string/secure_chats" />

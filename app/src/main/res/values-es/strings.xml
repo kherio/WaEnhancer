@@ -512,4 +512,6 @@
     <string name="secure_chat">Bloquear capturas en este chat</string>
     <string name="secure_chat_on">Capturas bloqueadas en este chat</string>
     <string name="secure_chat_off">Capturas permitidas en este chat</string>
+    <string name="strip_metadata">Borrar metadatos de imágenes</string>
+    <string name="strip_metadata_sum">Elimina la ubicación, el modelo del móvil, las fechas y el autor de las imágenes que WhatsApp lee desde otras apps (galería, archivos, compartir). Se conserva la orientación. No cubre datos XMP ni otros tipos de archivo.</string>
 </resources>
