@@ -507,4 +507,9 @@
     <string name="stickers">Stickers</string>
     <string name="update_allow_install">Para instalar actualizaciones desde WaToolkit, permite \"Instalar apps desconocidas\" a esta app. Al activarlo, vuelve atrás y busca actualizaciones de nuevo.</string>
     <string name="toolkit_tab">Herramientas</string>
+    <string name="secure_chats">Bloquear capturas en chats</string>
+    <string name="secure_chats_sum">Impide capturas y grabación de pantalla en los chats que elijas. Se activa en cada chat desde su pantalla de información.</string>
+    <string name="secure_chat">Bloquear capturas en este chat</string>
+    <string name="secure_chat_on">Capturas bloqueadas en este chat</string>
+    <string name="secure_chat_off">Capturas permitidas en este chat</string>
 </resources>

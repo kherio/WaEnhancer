@@ -562,4 +562,9 @@
     <string name="disable_document_scanner_sum">Disables the ML Kit document scanner in the document picker. Fixes a crash when opening it on some devices</string>
     <string name="update_allow_install">To install updates from WaToolkit, allow \"Install unknown apps\" for this app. After enabling it, go back and check for updates again.</string>
     <string name="toolkit_tab">Tools</string>
+    <string name="secure_chats">Block screenshots in chats</string>
+    <string name="secure_chats_sum">Prevents screenshots and screen recording in the chats you choose. Turn it on for each chat from its info screen.</string>
+    <string name="secure_chat">Block screenshots in this chat</string>
+    <string name="secure_chat_on">Screenshots blocked in this chat</string>
+    <string name="secure_chat_off">Screenshots allowed in this chat</string>
 </resources>

@@ -60,6 +60,7 @@ import com.wmods.wppenhacer.xposed.features.privacy.FreezeLastSeen
 import com.wmods.wppenhacer.xposed.features.privacy.HideChat
 import com.wmods.wppenhacer.xposed.features.privacy.HideSeen
 import com.wmods.wppenhacer.xposed.features.privacy.LockedChatsEnhancer
+import com.wmods.wppenhacer.xposed.features.privacy.ScreenshotBlock
 import com.wmods.wppenhacer.xposed.features.privacy.TagMessage
 import com.wmods.wppenhacer.xposed.features.privacy.TypingPrivacy
 import com.wmods.wppenhacer.xposed.features.privacy.ViewOnce
@@ -123,6 +124,7 @@ internal object FeatureRegistry {
         Toolkit::class.java,
         AntiWa::class.java,
         CustomPrivacy::class.java,
+        ScreenshotBlock::class.java,
         AudioTranscript::class.java,
         GoogleTranslate::class.java,
         ContactVerify::class.java,

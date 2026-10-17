@@ -50,6 +50,11 @@
             app:title="@string/custom_privacy_per_contact" />
 
         <rikka.material.preference.MaterialSwitchPreference
+            app:key="secure_chats"
+            app:summary="@string/secure_chats_sum"
+            app:title="@string/secure_chats" />
+
+        <rikka.material.preference.MaterialSwitchPreference
             app:key="freezelastseen"
             app:summary="@string/freezelastseen_sum"
             app:title="@string/freezelastseen" />
