@@ -1978,7 +1978,13 @@ object Unobfuscator {
     @JvmStatic
     fun loadHeaderChannelItemClass(classLoader: ClassLoader): Class<*> {
         return UnobfuscatorCache.getInstance().getClass(classLoader) {
+            // WhatsApp 2.26.41 dropped the "statusTilesEnabled" field; the class name in toString() is stable.
             findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "statusTilesEnabled")
+                ?: findFirstClassUsingStrings(
+                    classLoader,
+                    StringMatchType.Contains,
+                    "NewsletterHeaderDataItem("
+                )
                 ?: throw RuntimeException("HeaderChannelItem class not found")
         }
     }
@@ -3530,13 +3536,34 @@ object Unobfuscator {
         }
     }
 
+    /**
+     * WhatsApp 2.26.41 removed the "cm-null-contact" log string. The method is still the one in the
+     * calls manager (the class that logs "app/startOutgoingCall/from ") with the shape
+     * (Context, contact, int, boolean) -> non-void.
+     */
+    private fun findStartOutgoingCallByShape(classLoader: ClassLoader): Method? {
+        val anchor = findFirstMethodUsingStrings(
+            classLoader,
+            StringMatchType.Contains,
+            "app/startOutgoingCall/from "
+        ) ?: return null
+        return anchor.declaringClass.declaredMethods.firstOrNull {
+            it.parameterCount == 4 &&
+                it.parameterTypes[0] == android.content.Context::class.java &&
+                it.parameterTypes[2] == Int::class.javaPrimitiveType &&
+                it.parameterTypes[3] == Boolean::class.javaPrimitiveType &&
+                it.returnType != Void.TYPE
+        }
+    }
+
     fun loadStartOutgoingCallMethod(classLoader: ClassLoader): Method {
         return UnobfuscatorCache.getInstance().getMethod(classLoader) {
             findFirstMethodUsingStrings(
                 classLoader,
                 StringMatchType.Contains,
                 "outgoing-launch/cm-null-contact"
-            ) ?: throw NoSuchMethodException("StartOutgoingCall method not found")
+            ) ?: findStartOutgoingCallByShape(classLoader)
+            ?: throw NoSuchMethodException("StartOutgoingCall method not found")
         }
     }
 
