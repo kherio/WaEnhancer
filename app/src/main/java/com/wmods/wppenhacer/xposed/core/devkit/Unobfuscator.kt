@@ -1978,7 +1978,13 @@ object Unobfuscator {
     @JvmStatic
     fun loadHeaderChannelItemClass(classLoader: ClassLoader): Class<*> {
         return UnobfuscatorCache.getInstance().getClass(classLoader) {
+            // WhatsApp 2.26.41 dropped the "statusTilesEnabled" field; the class name in toString() is stable.
             findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "statusTilesEnabled")
+                ?: findFirstClassUsingStrings(
+                    classLoader,
+                    StringMatchType.Contains,
+                    "NewsletterHeaderDataItem("
+                )
                 ?: throw RuntimeException("HeaderChannelItem class not found")
         }
     }
