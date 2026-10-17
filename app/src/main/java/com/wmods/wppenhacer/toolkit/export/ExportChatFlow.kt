@@ -27,7 +27,7 @@ import java.text.Normalizer
 import java.util.Locale
 import java.util.concurrent.CancellationException
 
-/** Herramienta "Exportar chat": elegir chat y formato, elegir dónde guardar y exportar. */
+/** "Export chat" tool: choose the chat and format, choose where to save, and export. */
 class ExportChatFlow(private val activity: Activity) {
 
     private class ChatRow(val info: ChatImporter.ChatInfo, val name: String, val key: String)
@@ -40,7 +40,7 @@ class ExportChatFlow(private val activity: Activity) {
         const val REQUEST_SAVE = 0x5A18
         private var pending: Pending? = null
 
-        /** Lo llama la función Toolkit cuando vuelve el selector de "guardar como". */
+        /** Called by the Toolkit feature when the "save as" picker returns. */
         fun onResult(resultCode: Int, data: Intent?) {
             val p = pending ?: return
             pending = null

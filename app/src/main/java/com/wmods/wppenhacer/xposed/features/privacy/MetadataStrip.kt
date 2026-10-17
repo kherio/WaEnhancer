@@ -14,9 +14,9 @@ import java.io.File
 import java.util.UUID
 
 /**
- * Borra de las imágenes (JPEG, PNG, WebP) los metadatos que revelan datos personales —ubicación GPS,
- * modelo del móvil, fechas, autor, comentarios— cuando WhatsApp las lee desde otra app (galería,
- * selector de documentos, compartir). La orientación se conserva para que la imagen no salga girada.
+ * Removes from images (JPEG, PNG, WebP) the metadata that reveals personal data (GPS location,
+ * phone model, dates, author, comments) when WhatsApp reads them from another app (gallery,
+ * document picker, share). Orientation is kept so the image does not come out rotated.
  */
 class MetadataStrip(
     classLoader: ClassLoader,
@@ -61,7 +61,7 @@ class MetadataStrip(
         }
     }
 
-    /** Copia la imagen a un archivo temporal, le borra los metadatos y devuelve un descriptor de solo lectura. */
+    /** Copies the image to a temporary file, strips its metadata and returns a read-only descriptor. */
     private fun strip(original: AssetFileDescriptor, ext: String): AssetFileDescriptor? {
         val dir = File(Utils.application.cacheDir, "stripped").apply { mkdirs() }
         val tmp = File(dir, "${UUID.randomUUID()}.$ext")
@@ -75,7 +75,7 @@ class MetadataStrip(
             logDebug(e)
             return null
         } finally {
-            // El descriptor ya abierto sigue siendo válido aunque se elimine el archivo.
+            // The already open descriptor stays valid even if the file is deleted.
             tmp.delete()
         }
     }

@@ -6,7 +6,7 @@ import android.media.MediaMetadataRetriever
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-/** Datos que WhatsApp guarda de un adjunto (dimensiones, duración en segundos y miniatura JPEG). */
+/** Data WhatsApp stores for an attachment (dimensions, duration in seconds and JPEG thumbnail). */
 class MediaInfo(
     val width: Int = 0,
     val height: Int = 0,
@@ -18,7 +18,7 @@ fun interface MediaProbe {
     fun probe(file: File, kind: MediaKind): MediaInfo
 }
 
-/** Implementación con las APIs de Android. Todo es opcional: si algo falla se devuelve lo que haya. */
+/** Implementation using the Android APIs. Everything is optional: if something fails, whatever is available is returned. */
 object AndroidMediaProbe : MediaProbe {
 
     private const val THUMB_SIDE = 100

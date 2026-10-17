@@ -8,7 +8,7 @@ import com.wmods.wppenhacer.R
 import com.wmods.wppenhacer.activities.base.BaseActivity
 import com.wmods.wppenhacer.ui.fragments.ToolsFragment
 
-/** Pantalla "Herramientas" de WaToolkit dentro de la app del módulo. */
+/** WaToolkit "Tools" screen inside the module app. */
 class ToolsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

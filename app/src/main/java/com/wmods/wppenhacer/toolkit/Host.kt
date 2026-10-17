@@ -11,7 +11,7 @@ import android.widget.Toast
 import de.robv.android.xposed.XposedBridge
 import java.io.File
 
-/** Utilidades para trabajar dentro del proceso de WhatsApp (o WhatsApp Business). */
+/** Helpers for working inside the WhatsApp (or WhatsApp Business) process. */
 object Host {
 
     fun dp(context: Context, v: Int): Int =
@@ -19,7 +19,7 @@ object Host {
             TypedValue.COMPLEX_UNIT_DIP, v.toFloat(), context.resources.displayMetrics
         ).toInt()
 
-    /** Carpeta de datos de la cuenta activa (con varias cuentas está en accounts/<id>). */
+    /** Data folder of the active account (with several accounts it is accounts/<id>). */
     fun accountDataDir(context: Context): File {
         val dataDir = context.applicationContext.filesDir.parentFile!!
         val sw = File(dataDir, "app_account_switching/active_account")
@@ -33,10 +33,10 @@ object Host {
         return dataDir
     }
 
-    /** Carpeta donde se guardan las copias de seguridad de las bases de datos. */
+    /** Folder where the database backups are stored. */
     fun backupRoot(context: Context): File = File(rootWhatsAppDir(context).parentFile, "WaToolkit/Backups")
 
-    /** Carpeta raíz de medios de WhatsApp ("WhatsApp" o "WhatsApp Business"). */
+    /** WhatsApp media root folder ("WhatsApp" or "WhatsApp Business"). */
     fun rootWhatsAppDir(context: Context): File {
         val app = context.applicationContext
         val appName = app.packageManager.getApplicationLabel(app.applicationInfo).toString()
@@ -57,7 +57,7 @@ object Host {
         Runtime.getRuntime().exit(0)
     }
 
-    /** Abre el chat [jid] de WhatsApp situado en el mensaje [rowId]. Devuelve false si no se pudo. */
+    /** Opens WhatsApp chat [jid] at message [rowId]. Returns false if it could not be opened. */
     @Suppress("DEPRECATION")
     fun openConversation(activity: Activity, jid: String, rowId: Long, sortId: Long?): Boolean = try {
         val name = activity.packageManager
@@ -95,10 +95,10 @@ object Host {
         XposedBridge.log("[WaToolkit] $msg")
     }
 
-    /** Color de texto de los diálogos del módulo (tema Material You). */
+    /** Text color of the module dialogs (Material You theme). */
     fun textColor(context: Context): Int = Monet.palette(context).onSurface
 
-    /** Nombre del contacto del teléfono para un número, si WhatsApp tiene permiso de contactos. */
+    /** Phone contact name for a number, if WhatsApp has the contacts permission. */
     fun contactName(context: Context, phoneDigits: String): String? = try {
         val uri = Uri.withAppendedPath(
             ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode("+$phoneDigits")
@@ -110,7 +110,7 @@ object Host {
         null
     }
 
-    /** Contactos del teléfono con número internacional (E.164) conocido: (nombre, solo dígitos). */
+    /** Phone contacts with a known international (E.164) number: (name, digits only). */
     fun deviceContacts(context: Context): List<Pair<String, String>> = try {
         val out = LinkedHashMap<String, String>()
         context.contentResolver.query(

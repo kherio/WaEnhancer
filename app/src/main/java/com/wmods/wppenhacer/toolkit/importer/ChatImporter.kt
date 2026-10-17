@@ -9,23 +9,23 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Inserta en msgstore.db de WhatsApp los mensajes de un chat exportado.
+ * Inserts the messages of an exported chat into WhatsApp's msgstore.db.
  *
- * No conoce de antemano el esquema de la base de datos (cambia entre versiones de WhatsApp): lee
- * las columnas reales con PRAGMA table_info y solo escribe las que existen. Para la fila de
+ * It does not know the database schema in advance (it changes between WhatsApp versions): it reads
+ * the real columns with PRAGMA table_info and only writes the ones that exist. For the
  * `message` se parte de un mensaje real del mismo tipo (para heredar los valores que WhatsApp
  * espera) y se sobrescribe lo propio del mensaje importado.
  *
  * Reglas de seguridad:
- *  - Solo se importan mensajes anteriores al primero que ya tiene el chat (o todos si está vacío),
- *    de modo que ningún mensaje existente cambia de sitio ni se duplica.
- *  - Los archivos se copian antes de tocar la base de datos, y la base de datos se escribe en
- *    lotes cortos para no bloquear a WhatsApp. Si algo falla (o se cancela), los mensajes ya
- *    insertados se deshacen y los archivos copiados se borran.
+ *  - Only messages older than the first one the chat already has are imported (or all if it is empty),
+ *    so no existing message moves or is duplicated.
+ *  - Files are copied before touching the database, and the database is written in
+ *    short batches so WhatsApp is not blocked. If anything fails (or is cancelled), messages already
+ *    inserted are rolled back and the copied files are deleted.
  */
 class ChatImporter(
     private val dbFile: File,
-    /** Carpeta raíz de WhatsApp en Android/media (la que contiene "Media/"). */
+    /** WhatsApp root folder in Android/media (the one that contains "Media/"). */
     private val mediaRoot: File,
     private val probe: MediaProbe = AndroidMediaProbe
 ) {
@@ -35,35 +35,35 @@ class ChatImporter(
         val rawJid: String,
         val isGroup: Boolean,
         val subject: String?,
-        /** Para un chat guardado con LID: el número de teléfono del mismo contacto, si se conoce. */
+        /** For a chat stored with a LID: the phone number of the same contact, if known. */
         val phoneJid: String? = null
     )
 
     class Options(
         val chatRowId: Long,
-        /** Remitente del TXT que eres tú (sus mensajes se importan como enviados). */
+        /** Sender in the TXT that is you (their messages are imported as sent). */
         val meName: String,
         val importMedia: Boolean,
         val backup: Boolean,
         /**
-         * Para un contacto que aún no tiene chat: su JID ("34600111222@s.whatsapp.net"). El chat
-         * se crea al importar y [chatRowId] se ignora (si ya existiera, se usa ese).
+         * For a contact that has no chat yet: their JID ("34600111222@s.whatsapp.net"). The chat
+         * is created on import and [chatRowId] is ignored (if it already existed, that one is used).
          */
         val newChatJid: String? = null
     )
 
-    /** Contacto de WhatsApp con el que todavía no hay ningún chat. */
+    /** WhatsApp contact with whom there is no chat yet. */
     data class ContactInfo(val jid: String, val name: String)
 
     class Result(
         val imported: Int,
         val importedMedia: Int,
-        /** Adjuntos que no se pudieron copiar y se importaron como texto. */
+        /** Attachments that could not be copied and were imported as text. */
         val mediaFailed: Int,
-        /** Mensajes que no se importaron por no ser anteriores al primero del chat. */
+        /** Messages that were not imported because they are not older than the first one in the chat. */
         val skippedNotOlder: Int,
         val backupFile: File?,
-        /** True si hubo que crear el chat (el contacto no tenía uno). */
+        /** True if the chat had to be created (the contact had none). */
         val chatCreated: Boolean = false
     )
 
@@ -82,7 +82,7 @@ class ChatImporter(
 
     // ------------------------------------------------------------------ lectura
 
-    /** Chats que se pueden elegir como destino (sin estados ni listas de difusión). */
+    /** Chats that can be chosen as the destination (no statuses or broadcast lists). */
     fun listChats(): List<ChatInfo> {
         if (!dbFile.exists()) throw ImportException(Code.DB_MISSING, "No existe msgstore.db")
         val chatCols = openRead().use { db -> columnsOf(db, "chat").map { it.name }.toSet() }
@@ -123,7 +123,7 @@ class ChatImporter(
         else out.map { if (it.rawJid in phoneByLid) it.copy(phoneJid = phoneByLid[it.rawJid]) else it }
     }
 
-    /** Nombres de la agenda de WhatsApp (wa.db): JID → nombre. Vacío si no se puede leer. */
+    /** Names from the WhatsApp address book (wa.db): JID -> name. Empty if it cannot be read. */
     fun contactNames(contactsDb: File): Map<String, String> {
         if (!contactsDb.exists()) return emptyMap()
         val db = try {
@@ -151,8 +151,8 @@ class ChatImporter(
     }
 
     /**
-     * Contactos de WhatsApp (leídos de wa.db) que no tienen todavía un chat. Si wa.db no se puede
-     * leer o no trae contactos, devuelve una lista vacía.
+     * WhatsApp contacts (read from wa.db) that do not have a chat yet. If wa.db cannot be
+     * read or has no contacts, returns an empty list.
      */
     fun listContactsWithoutChat(contactsDb: File): List<ContactInfo> {
         if (!contactsDb.exists() || !dbFile.exists()) return emptyList()
@@ -162,7 +162,7 @@ class ChatImporter(
                 "SELECT j.raw_string FROM chat c JOIN jid j ON j._id = c.jid_row_id", null
             ).use { c -> while (c.moveToNext()) c.getString(0)?.let { taken += it } }
             try {
-                // Chats que WhatsApp guarda con el identificador LID de un contacto.
+                // Chats WhatsApp stores under a contact's LID identifier.
                 db.rawQuery(
                     "SELECT jp.raw_string FROM chat c JOIN jid_map m ON m.lid_row_id = c.jid_row_id " +
                             "JOIN jid jp ON jp._id = m.jid_row_id", null
@@ -199,7 +199,7 @@ class ChatImporter(
         return out.sortedBy { it.name.lowercase(Locale.ROOT) }
     }
 
-    /** Fila del chat de este JID, también si WhatsApp lo guarda con el LID del mismo contacto. */
+    /** Chat row for this JID, also if WhatsApp stores it under the LID of the same contact. */
     private fun findChatRowForJid(db: SQLiteDatabase, jid: String): Long? {
         db.rawQuery(
             "SELECT c._id FROM chat c JOIN jid j ON j._id = c.jid_row_id WHERE j.raw_string = ? LIMIT 1",
@@ -228,7 +228,7 @@ class ChatImporter(
         return db
     }
 
-    // ------------------------------------------------------------------ importación
+    // ------------------------------------------------------------------ import
 
     private class Prepared(
         val msg: ParsedMessage,
@@ -306,7 +306,7 @@ class ChatImporter(
         val globalMaxSort: Long?
     )
 
-    /** Lee el estado actual del chat destino y del conjunto de mensajes. */
+    /** Reads the current state of the destination chat and of the message set. */
     private fun inspect(chatRowId: Long): ChatState = openRead().use { db ->
         val chat = findChat(db, chatRowId)
             ?: throw ImportException(Code.CHAT_NOT_FOUND, "El chat elegido ya no existe")
@@ -345,7 +345,7 @@ class ChatImporter(
         }
     }
 
-    /** Estado para un chat que todavía no existe: vacío, con los sort_id globales actuales. */
+    /** State for a chat that does not exist yet: empty, with the current global sort_ids. */
     private fun inspectNew(jid: String): ChatState = openRead().use { db ->
         val msgCols = columnsOf(db, "message").map { it.name }.toSet()
         var gMin: Long? = null
@@ -362,7 +362,7 @@ class ChatImporter(
 
     private class CreatedChat(val chatRowId: Long, val jidRowId: Long, val jidCreated: Boolean)
 
-    /** Crea la fila de `jid` (si no existe) y la del chat vacío de un contacto. */
+    /** Creates the `jid` row (if missing) and the empty chat row for a contact. */
     private fun createChat(jid: String): CreatedChat {
         val db = openWrite()
         try {
@@ -377,7 +377,7 @@ class ChatImporter(
                     arrayOf(jid, user, server)
                 ).use { c -> if (c.moveToFirst()) jidRow = c.getLong(0) }
                 if (jidRow < 0) {
-                    // Se copia el formato de otro contacto individual (agent, device, type...).
+                    // The format of another individual contact is copied (agent, device, type...).
                     val cv = db.rawQuery(
                         "SELECT * FROM jid WHERE server = ? ORDER BY _id DESC LIMIT 1", arrayOf(server)
                     ).use { c -> if (c.moveToFirst()) cursorToValues(c) else ContentValues() }
@@ -391,7 +391,7 @@ class ChatImporter(
                     jidCreated = true
                 }
 
-                // Si WhatsApp conoce el LID del contacto, el chat cuelga del LID y no del número.
+                // If WhatsApp knows the contact's LID, the chat hangs off the LID and not the number.
                 var chatJidRow = jidRow
                 try {
                     db.rawQuery(
@@ -424,7 +424,7 @@ class ChatImporter(
         }
     }
 
-    /** Fila del chat de [jid]; si todavía no existe lo crea vacío (con [subject] si es un grupo). */
+    /** Chat row for [jid]; if it does not exist yet it is created empty (with [subject] if it is a group). */
     fun ensureChat(jid: String, subject: String?): Long {
         openRead().use { findChatRowForJid(it, jid) }?.let { return it }
         val created = createChat(jid)
@@ -441,10 +441,10 @@ class ChatImporter(
         return created.chatRowId
     }
 
-    /** Fila del chat de [jid] (o del LID/número equivalente) en la base actual, si existe. */
+    /** Chat row for [jid] (or the equivalent LID/number) in the current database, if it exists. */
     fun findChatRow(jid: String): Long? = openRead().use { findChatRowForJid(it, jid) }
 
-    /** Deshace [createChat] si la importación falla: solo borra lo que sigue vacío. */
+    /** Undoes [createChat] if the import fails: only deletes what is still empty. */
     private fun removeCreatedChat(c: CreatedChat) {
         try {
             openWrite().use { db ->
@@ -469,7 +469,7 @@ class ChatImporter(
         val dir = dbFile.parentFile!!
         val needed = dbFile.length() + dbFile.length() / 10
         if (dir.usableSpace < needed) {
-            throw ImportException(Code.NO_SPACE_DB, "No hay espacio para la copia de seguridad")
+            throw ImportException(Code.NO_SPACE_DB, "Not enough space for the backup")
         }
         openWrite().use { db ->
             try {
@@ -497,7 +497,7 @@ class ChatImporter(
                 }
             }
         }
-        // Solo se conservan las dos últimas copias para no llenar el almacenamiento.
+        // Only the two latest backups are kept so storage does not fill up.
         dir.listFiles { f -> f.name.startsWith("${dbFile.name}.pre-import-") && f.name.endsWith(".bak") }
             ?.sortedByDescending { it.name }?.drop(2)?.forEach { it.delete() }
         return target
@@ -515,7 +515,7 @@ class ChatImporter(
         val totalBytes = withMedia.sumOf { maxOf(source.mediaSize(it.msg.attachmentName!!), 0L) }
         mediaRoot.mkdirs()
         if (mediaRoot.usableSpace < totalBytes + (50L shl 20)) {
-            throw ImportException(Code.NO_SPACE_MEDIA, "No hay espacio para los adjuntos")
+            throw ImportException(Code.NO_SPACE_MEDIA, "Not enough space for the attachments")
         }
 
         var done = 0
@@ -547,7 +547,7 @@ class ChatImporter(
                     MediaInfo()
                 }
             } catch (_: Exception) {
-                // Se importará como texto con el nombre del archivo.
+                // It will be imported as text with the file name.
                 part?.delete()
                 p.kind = null
             }
@@ -595,7 +595,7 @@ class ChatImporter(
         return out
     }
 
-    /** Rellena con ceros las columnas NOT NULL sin valor por defecto que no se han informado. */
+    /** Fills with zeros the NOT NULL columns without a default value that were not provided. */
     private fun fillRequired(cols: List<Col>, cv: ContentValues) {
         for (c in cols) {
             if (c.pk || !c.notNull || c.default != null || cv.containsKey(c.name)) continue
@@ -626,7 +626,7 @@ class ChatImporter(
 
     private class Template(val values: ContentValues, val sameChat: Boolean)
 
-    /** Mensaje real del mismo tipo y dirección, preferentemente del propio chat. */
+    /** Real message of the same type and direction, preferably from the same chat. */
     private fun findTemplate(db: SQLiteDatabase, chatRowId: Long, fromMe: Boolean, type: Int): Template? {
         val args = arrayOf(chatRowId.toString(), if (fromMe) "1" else "0", type.toString())
         db.rawQuery(
@@ -640,7 +640,7 @@ class ChatImporter(
         return null
     }
 
-    /** Pone a cero lo que no debe heredarse de un mensaje ajeno (reenviado, efímero, destacado...). */
+    /** Zeroes what must not be inherited from another message (forwarded, ephemeral, starred...). */
     private fun sanitize(cv: ContentValues) {
         val zero = listOf(
             "starred", "message_add_on_flags", "origination_flags", "broadcast", "recipient_count"
@@ -739,7 +739,7 @@ class ChatImporter(
         }
     }
 
-    /** Deshace lo insertado por esta importación (claves WAEI... posteriores al estado inicial). */
+    /** Rolls back what this import inserted (WAEI... keys after the initial state). */
     private fun undo(db: SQLiteDatabase, chatRowId: Long, maxIdBefore: Long) {
         try {
             db.beginTransaction()
@@ -783,7 +783,7 @@ class ChatImporter(
         val kind = p.kind
         val type = kind?.messageType ?: 0
         var template = templateFor(env, p.fromMe, type)
-        // Sin mensaje del que copiar la estructura, un adjunto se importa como texto.
+        // With no message to copy the structure from, an attachment is imported as text.
         val asMedia = kind != null && template != null && env.mediaCols.isNotEmpty()
         val finalType = if (asMedia) type else 0
         if (!asMedia) template = templateFor(env, p.fromMe, 0)
@@ -895,13 +895,13 @@ class ChatImporter(
                 try {
                     env.db.insertOrThrow("message_thumbnail", null, tv)
                 } catch (_: Exception) {
-                    // Sin miniatura WhatsApp la genera al abrir el chat.
+                    // Without a thumbnail, WhatsApp generates it when the chat is opened.
                 }
             }
         }
     }
 
-    /** Índice de búsqueda; es opcional, si falla (p. ej. tokenizador propio) se deja de intentar. */
+    /** Search index; it is optional, if it fails (e.g. custom tokenizer) it stops being attempted. */
     private fun insertFts(env: Env, rowId: Long, text: String) {
         if (!env.ftsEnabled) return
         try {
@@ -916,7 +916,7 @@ class ChatImporter(
         }
     }
 
-    /** Fila de `jid` del participante de un grupo a partir del número que aparece en el TXT. */
+    /** `jid` row of a group participant from the number that appears in the TXT. */
     private fun resolveParticipant(env: Env, speaker: String): Long? {
         val digits = ChatTxtParser.phoneDigits(speaker) ?: return null
         return env.participantCache.getOrPut(digits) {
@@ -953,7 +953,7 @@ class ChatImporter(
         }
     }
 
-    /** Si el chat estaba vacío, apunta sus "último mensaje" a lo importado. */
+    /** If the chat was empty, points its "last message" to the imported data. */
     private fun updateChat(env: Env, lastRowId: Long, lastSortId: Long?, lastTs: Long) {
         val names = env.chatCols.map { it.name }.toSet()
         val cv = ContentValues()

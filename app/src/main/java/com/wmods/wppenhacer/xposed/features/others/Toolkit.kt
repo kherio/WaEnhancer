@@ -21,9 +21,9 @@ import com.wmods.wppenhacer.xposed.core.WppCore.homeActivityClass
 
 /**
  * Herramientas de WaToolkit dentro de WhatsApp (importar/exportar chats, mensajes borrados,
- * recuperar chat y copias de seguridad). Se lanzan desde la pantalla "Herramientas" de la app del
- * módulo, que abre WhatsApp y deja aquí la petición (ver [ToolRequest]); este hook la recoge al
- * mostrarse la pantalla principal y recibe los resultados de los selectores de archivos.
+ * recover chat and backups). They are launched from the "Tools" screen of the
+ * module app, which opens WhatsApp and leaves the request here (see [ToolRequest]); this hook picks it up when
+ * the main screen is shown and receives the results of the file pickers.
  */
 class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
     Feature(classLoader, preferences) {
@@ -34,7 +34,7 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
         hookPendingTool()
     }
 
-    /** Cuando se abre la pantalla principal, atiende la herramienta pedida desde la app del módulo. */
+    /** When the main screen opens, handles the tool requested from the module app. */
     private fun hookPendingTool() {
         homeActivityClass.resolve().firstMethod {
             name = "onResume"
@@ -110,7 +110,7 @@ class Toolkit(classLoader: ClassLoader, preferences: SharedPreferences) :
         }
     }
 
-    /** Tras actualizar el módulo, avisa una vez de la nueva versión. */
+    /** After the module is updated, announces the new version once. */
     private fun announceUpdate(activity: Activity) {
         if (announced) return
         announced = true

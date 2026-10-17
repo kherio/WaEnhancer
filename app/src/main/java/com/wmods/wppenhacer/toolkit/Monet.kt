@@ -17,8 +17,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 
 /**
- * Colores Material You (Monet): usa la paleta dinámica del sistema (Android 12+) y, si no está
- * disponible, una paleta verde fija. Sigue el modo claro/oscuro con el que WhatsApp pinta su pantalla.
+ * Material You (Monet) colors: uses the system dynamic palette (Android 12+) and, if it is not
+ * available, a fixed green palette. It follows the light/dark mode WhatsApp uses to draw its screen.
  */
 object Monet {
     class Palette(
@@ -75,7 +75,7 @@ object Monet {
 
     private fun withAlpha(color: Int, a: Float) = Color.argb((255 * a).toInt(), Color.red(color), Color.green(color), Color.blue(color))
 
-    /** Lista simple de textos con los colores del tema. */
+    /** Simple list of texts using the theme colors. */
     fun adapter(context: Context, items: List<String>): ArrayAdapter<String> {
         val p = palette(context)
         return object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, items.toMutableList()) {
@@ -87,7 +87,7 @@ object Monet {
         }
     }
 
-    /** Aplica el tema a un diálogo ya mostrado: fondo redondeado, botones y todo su contenido. */
+    /** Applies the theme to an already shown dialog: rounded background, buttons and all its content. */
     fun styleDialog(dialog: AlertDialog) {
         try {
             val ctx = dialog.context

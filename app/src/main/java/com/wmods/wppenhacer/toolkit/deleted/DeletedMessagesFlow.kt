@@ -27,7 +27,7 @@ import java.text.Normalizer
 import java.util.Date
 import java.util.Locale
 
-/** Pantalla "Mensajes borrados": tarjetas tabuladas (quién, grupo/chat, texto) con filtro y registro de texto opcional. */
+/** "Deleted messages" screen: tabbed cards (who, group/chat, text) with a filter and an optional text log. */
 class DeletedMessagesFlow(private val activity: Activity) {
 
     private class Row(

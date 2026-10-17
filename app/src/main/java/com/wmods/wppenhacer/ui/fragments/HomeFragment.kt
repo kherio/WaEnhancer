@@ -120,7 +120,7 @@ class HomeFragment : BaseFragment() {
 
         binding.updateCard.setOnClickListener { view ->
             animateClick(view)
-            // Busca la última release y, si hay una nueva, la descarga e instala desde aquí.
+            // Looks for the latest release and, if there is a new one, downloads and installs it from here.
             com.wmods.wppenhacer.toolkit.update.UpdateFlow(requireActivity()).start()
         }
 

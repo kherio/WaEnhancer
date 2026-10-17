@@ -2873,11 +2873,11 @@ object Unobfuscator {
     }
 
     /**
-     * Comprobación del aviso "Solo puedes fijar 3 chats" (WhatsApp Plus, WhatsApp 2.26.39+):
-     * método estático (self, Set<seleccionados>) -> Boolean que devuelve true si, al fijar los
-     * chats seleccionados, se superan 3 y hay que mostrar la oferta de suscripción.
-     * Se localiza por su forma (usa el número 3, recibe (su clase, Set) y llama al método sin
-     * parámetros que devuelve el Set de chats fijados de la misma clase que el de loadPinnedHashSetMethod).
+     * Check behind the "You can only pin 3 chats" notice (WhatsApp Plus, WhatsApp 2.26.39+):
+     * a static method (self, Set<selected>) -> Boolean that returns true if pinning the
+     * selected chats goes over 3 and the subscription offer must be shown.
+     * It is located by its shape (uses the number 3, takes (its class, Set) and calls the no-argument
+     * method returning the pinned-chats Set from the same class as loadPinnedHashSetMethod's).
      */
     private fun findPinnedUpsellCheck(classLoader: ClassLoader): Pair<MethodData, Method> {
         val pinnedClassName = loadPinnedHashSetMethod(classLoader).declaringClass.name
@@ -2914,9 +2914,9 @@ object Unobfuscator {
     }
 
     /**
-     * Comprobación del aviso "Solo puedes fijar 3 chats" (WhatsApp Plus, WhatsApp 2.26.39+):
-     * método estático (self, Set<seleccionados>) -> Boolean que devuelve true si, al fijar los
-     * chats seleccionados, se superan 3 y hay que mostrar la oferta de suscripción.
+     * Check behind the "You can only pin 3 chats" notice (WhatsApp Plus, WhatsApp 2.26.39+):
+     * a static method (self, Set<selected>) -> Boolean that returns true if pinning the
+     * selected chats goes over 3 and the subscription offer must be shown.
      */
     @Throws(Exception::class)
     @JvmStatic
@@ -2927,8 +2927,8 @@ object Unobfuscator {
     }
 
     /**
-     * Rutina que fija los chats seleccionados ("ConversationPinHelper/pinSelectedJids"). En
-     * WhatsApp 2.26.39+ el máximo (3, o 20 con WhatsApp Plus) es una constante dentro de ella.
+     * Routine that pins the selected chats ("ConversationPinHelper/pinSelectedJids"). In
+     * WhatsApp 2.26.39+ the maximum (3, or 20 with WhatsApp Plus) is a constant inside it.
      */
     @Throws(Exception::class)
     @JvmStatic
@@ -2943,8 +2943,8 @@ object Unobfuscator {
     }
 
     /**
-     * Implementaciones de "¿el usuario tiene WhatsApp Plus?". Es la primera llamada a un método
-     * booleano de interfaz sin parámetros dentro de la comprobación del aviso de Plus.
+     * Implementations of "does the user have WhatsApp Plus?". It is the first call to a no-argument
+     * boolean interface method inside the Plus notice check.
      */
     @Throws(Exception::class)
     @JvmStatic

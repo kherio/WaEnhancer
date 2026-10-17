@@ -4,14 +4,14 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.File
 
 /**
- * Registro local con el texto de los mensajes.
+ * Local log with the text of the messages.
  *
- * WhatsApp elimina el contenido de un mensaje cuando se borra para todos, así que después ya no
- * se puede leer. Para poder mostrarlo, este registro guarda una copia del texto de cada mensaje en
- * una tabla propia (`waimport_log`) de msgstore.db. La copia la hace SQLite con dos triggers, así
- * que no depende de ningún hook ni de la versión de WhatsApp. Nada sale del dispositivo.
+ * WhatsApp removes a message's content when it is deleted for everyone, so afterwards it can no
+ * longer be read. To be able to show it, this log keeps a copy of each message's text in
+ * its own table (`waimport_log`) in msgstore.db. SQLite makes the copy with two triggers, so
+ * it does not depend on any hook or on the WhatsApp version. Nothing leaves the device.
  *
- * Se puede quitar en cualquier momento: [disable] borra los triggers y la tabla.
+ * It can be removed at any time: [disable] drops the triggers and the table.
  */
 class DeletedLog(private val dbFile: File) {
 
@@ -54,8 +54,8 @@ class DeletedLog(private val dbFile: File) {
     }
 
     /**
-     * Activa el registro y copia los textos de los últimos [backfillDays] días (los mensajes
-     * futuros se copian solos). Devuelve cuántos mensajes se copiaron ahora.
+     * Enables the log and copies the texts of the last [backfillDays] days (future messages
+     * are copied automatically). Returns how many messages were copied now.
      */
     fun enable(backfillDays: Int = 90): Long {
         if (!dbFile.exists()) throw IllegalStateException("No existe msgstore.db")
@@ -68,7 +68,7 @@ class DeletedLog(private val dbFile: File) {
             val needed = listOf("_id", "key_id", "chat_row_id", "from_me", "sender_jid_row_id", "timestamp", "message_type", "text_data")
             val missing = needed.filter { it !in cols }
             if (missing.isNotEmpty()) {
-                throw IllegalStateException("Esta versión de WhatsApp no tiene las columnas esperadas: $missing")
+                throw IllegalStateException("This WhatsApp version does not have the expected columns: $missing")
             }
 
             val copy = "INSERT OR REPLACE INTO $TABLE(message_row_id, key_id, chat_row_id, from_me, " +
@@ -105,7 +105,7 @@ class DeletedLog(private val dbFile: File) {
         }
     }
 
-    /** Quita los triggers y la tabla. Los triggers primero, para que nunca apunten a una tabla que no existe. */
+    /** Drops the triggers and the table. Triggers first, so they never point to a table that does not exist. */
     fun disable() {
         if (!dbFile.exists()) return
         val db = openWrite()

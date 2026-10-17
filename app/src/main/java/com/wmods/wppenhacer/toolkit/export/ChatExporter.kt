@@ -10,12 +10,12 @@ import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/** Exporta un chat de msgstore.db a TXT (formato de WhatsApp), HTML o CSV, con adjuntos opcionales. */
+/** Exports a chat from msgstore.db to TXT (WhatsApp format), HTML or CSV, with optional attachments. */
 class ChatExporter(private val dbFile: File, private val mediaRoot: File) {
 
     enum class Format(val extension: String) { TXT("txt"), HTML("html"), CSV("csv") }
 
-    /** Textos que aparecen en el archivo exportado (el idioma lo decide quien llama). */
+    /** Texts that appear in the exported file (the caller decides the language). */
     class Labels(
         val me: String = "Me",
         val deleted: String = "This message was deleted",
@@ -43,7 +43,7 @@ class ChatExporter(private val dbFile: File, private val mediaRoot: File) {
     }
 
     companion object {
-        /** TXT y HTML con adjuntos van en un ZIP; el resto, en un archivo suelto. */
+        /** TXT and HTML with attachments go in a ZIP; everything else in a single file. */
         fun isZip(format: Format, includeMedia: Boolean) = includeMedia && format != Format.CSV
 
         fun suggestedName(title: String, format: Format, includeMedia: Boolean): String {
@@ -97,7 +97,7 @@ class ChatExporter(private val dbFile: File, private val mediaRoot: File) {
                 val mediaPath = c.getString(6)?.takeIf { it.isNotBlank() }
                 val body = (c.getString(5)?.takeIf { it.isNotEmpty() } ?: c.getString(4))
                 val text = if (deleted) c.getString(9)?.takeIf { it.isNotEmpty() } else body
-                // Mensajes de sistema u otros sin contenido: no se exportan.
+                // System messages and others without content are not exported.
                 if (!deleted && mediaPath == null && text.isNullOrEmpty()) continue
                 block(
                     Message(
@@ -109,11 +109,11 @@ class ChatExporter(private val dbFile: File, private val mediaRoot: File) {
         }
     }
 
-    // ------------------------------------------------------------------ exportación
+    // ------------------------------------------------------------------ export
 
     /**
-     * Escribe el chat en [out]. [senderName] devuelve el nombre de un participante a partir de su
-     * JID; en chats individuales (sin remitente) se usa [chatJid]. Bloqueante.
+     * Writes the chat to [out]. [senderName] returns a participant's name from their
+     * JID; in individual chats (no sender) [chatJid] is used. Blocking.
      */
     fun export(
         chatRowId: Long,

@@ -41,7 +41,7 @@ jobs:
           VERSION=$BASE
           if [ -n "$LATEST" ]; then
             NEXT="${LATEST%.*}.$(( ${LATEST##*.} + 1 ))"
-            # Se usa la mayor entre la versión base del código y la siguiente a la última release
+            # Use the higher of the base version in the code and the one after the latest release
             VERSION=$(printf '%s\n%s\n' "$BASE" "$NEXT" | sort -V | tail -n 1)
           fi
           SHA8=$(git rev-parse --short=8 HEAD)

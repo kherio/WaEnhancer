@@ -96,8 +96,8 @@ class PinnedLimit(
             }
         }
 
-        // WhatsApp 2.26.39+: aviso de WhatsApp Plus al fijar más de 3 chats. Se anula la comprobación
-        // para que el chat se fije igualmente. Si no se encuentra, el resto de la función sigue activa.
+        // WhatsApp 2.26.39+: WhatsApp Plus notice when pinning more than 3 chats. The check is overridden
+        // so the chat is pinned anyway. If it is not found, the rest of the feature stays active.
         try {
             val upsellCheckMethod = Unobfuscator.loadPinnedUpsellCheckMethod(classLoader)
             logDebug("[Pinned Limit] upsellCheck", upsellCheckMethod)
@@ -111,9 +111,9 @@ class PinnedLimit(
             logDebug(t)
         }
 
-        // WhatsApp 2.26.39+: el máximo es una constante (3, o 20 con Plus) dentro de la rutina que fija
-        // los chats. Mientras se ejecuta, la comprobación "¿tiene Plus?" responde que sí, de modo que
-        // se aplica el máximo de 20 y no el de 3.
+        // WhatsApp 2.26.39+: the maximum is a constant (3, or 20 with Plus) inside the routine that pins
+        // the chats. While it runs, the "has Plus?" check answers yes, so
+        // the maximum of 20 applies instead of 3.
         try {
             val pinHelper = Unobfuscator.loadPinHelperMethod(classLoader)
             logDebug("[Pinned Limit] pinHelper", pinHelper)
@@ -167,7 +167,7 @@ class PinnedLimit(
 
     private val firedHooks = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
 
-    /** Registra una sola vez que un gancho se ha ejecutado (ayuda a diagnosticar versiones nuevas de WhatsApp). */
+    /** Logs once that a hook has fired (helps diagnose new WhatsApp versions). */
     private fun logOnce(name: String) {
         if (firedHooks.add(name)) logDebug("[Pinned Limit] hook fired: $name")
     }

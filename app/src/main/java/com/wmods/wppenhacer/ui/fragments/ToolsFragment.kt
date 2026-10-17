@@ -22,9 +22,9 @@ import com.wmods.wppenhacer.toolkit.ToolRequest
 import com.wmods.wppenhacer.toolkit.update.UpdateFlow
 
 /**
- * Herramientas de WaToolkit dentro de la app del módulo. Trabajan sobre los datos de WhatsApp,
- * así que cada una abre WhatsApp y lanza allí la herramienta; "buscar actualizaciones" se
- * ejecuta aquí mismo.
+ * WaToolkit tools inside the module app. They work on WhatsApp's data,
+ * so each one opens WhatsApp and launches the tool there; "check for updates" runs
+ * right here.
  */
 class ToolsFragment : Fragment() {
 
@@ -110,7 +110,7 @@ class ToolsFragment : Fragment() {
         return NestedScrollView(ctx).apply { addView(list) }
     }
 
-    /** Abre WhatsApp (o WhatsApp Business, si es el único o el elegido) con la herramienta. */
+    /** Opens WhatsApp (or WhatsApp Business, if it is the only one or the chosen one) with the tool. */
     private fun open(tool: String) {
         val ctx = requireContext()
         val installed = listOf("com.whatsapp", "com.whatsapp.w4b").filter {

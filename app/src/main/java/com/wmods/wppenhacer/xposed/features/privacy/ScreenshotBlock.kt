@@ -25,8 +25,8 @@ import org.luckypray.dexkit.query.enums.StringMatchType
 import java.lang.reflect.Method
 
 /**
- * Bloquea capturas de pantalla, grabación de pantalla y la miniatura de "recientes" en los chats
- * elegidos (FLAG_SECURE). El chat se activa desde su pantalla de información.
+ * Blocks screenshots, screen recording and the "recents" thumbnail in the chosen
+ * chats (FLAG_SECURE). A chat is enabled from its info screen.
  */
 class ScreenshotBlock(
     classLoader: ClassLoader,
@@ -85,7 +85,7 @@ class ScreenshotBlock(
 
     private fun prefKey(number: String) = "${number}_secure"
 
-    /** El chat puede tardar un instante en estar listo, por eso se reintenta un par de veces. */
+    /** The chat may take a moment to be ready, so this retries a couple of times. */
     private fun applyToConversation(activity: Activity) {
         val handler = Handler(Looper.getMainLooper())
         for (delay in longArrayOf(0, 300, 1000)) {
@@ -101,7 +101,7 @@ class ScreenshotBlock(
         }
     }
 
-    /** Se usa setAttributes y no addFlags/setFlags porque esos están enganchados por "permitir capturas". */
+    /** setAttributes is used instead of addFlags/setFlags because those are hooked by "allow screenshots". */
     private fun setSecure(activity: Activity, secure: Boolean) {
         val window = activity.window
         val lp = window.attributes

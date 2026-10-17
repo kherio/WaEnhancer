@@ -4,7 +4,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Consulta la última release de GitHub (kherio/WaToolkit) y compara versiones. */
+/** Queries the latest GitHub release (kherio/WaToolkit) and compares versions. */
 object Updater {
     const val LATEST_URL = "https://api.github.com/repos/kherio/WaToolkit/releases/latest"
 
@@ -27,8 +27,8 @@ object Updater {
             .map { it.takeWhile { c -> c.isDigit() }.toIntOrNull() ?: 0 }
 
     /**
-     * Interpreta la respuesta de la API; null si no trae ningún APK.
-     * Con [business] se elige el APK "Business", si no el que no lo es.
+     * Parses the API response; null if it has no APK.
+     * With [business] the "Business" APK is chosen, otherwise the non-Business one.
      */
     fun parse(json: String, business: Boolean = false): Release? {
         val o = JSONObject(json)
@@ -46,7 +46,7 @@ object Updater {
         return fallback
     }
 
-    /** Descarga la info de la última release (bloqueante: llamar fuera del hilo principal). */
+    /** Downloads the latest release info (blocking: call off the main thread). */
     fun fetchLatest(business: Boolean = false): Release? {
         val c = URL(LATEST_URL).openConnection() as HttpURLConnection
         try {
@@ -74,7 +74,7 @@ object Updater {
         }
     }
 
-    /** Resultado de instalar con root: null si no hay root disponible. */
+    /** Result of installing with root: null if root is not available. */
     fun installWithRoot(apk: java.io.File): Pair<Boolean, String>? {
         return try {
             val tmp = "/data/local/tmp/watoolkit-update.apk"
@@ -89,7 +89,7 @@ object Updater {
         }
     }
 
-    /** Versión instalada del módulo según el sistema (requiere root); null si no se puede saber. */
+    /** Installed module version according to the system (requires root); null if unknown. */
     fun installedVersionWithRoot(packageName: String): String? = try {
         val p = ProcessBuilder("su", "-c", "dumpsys package $packageName | grep versionName")
             .redirectErrorStream(true).start()

@@ -129,12 +129,12 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
         }
 
     // ==========================================
-    // Operações de Modificação de KeyValue
+    // KeyValue modification operations
     // ==========================================
 
     /**
-     * Adiciona um novo KeyValue ao array. Se já existirem chaves com o mesmo nome,
-     * a nova será adicionada ao final, permitindo chaves duplicadas.
+     * Adds a new KeyValue to the array. If keys with the same name already exist,
+     * the new one is appended at the end, allowing duplicate keys.
      */
     fun addKeyValue(key: String, value: String) {
         try {
@@ -156,7 +156,7 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
     }
 
     /**
-     * Remove TODAS as ocorrências de um KeyValue correspondente à chave fornecida.
+     * Removes ALL occurrences of a KeyValue matching the given key.
      */
     fun removeAllKeyValuesByKey(key: String) {
         try {
@@ -175,13 +175,13 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
     }
 
     /**
-     * Remove uma instância específica de KeyValue.
-     * Útil quando existem chaves duplicadas e você quer remover apenas uma delas.
+     * Removes a specific KeyValue instance.
+     * Useful when duplicate keys exist and you want to remove only one of them.
      */
     fun removeKeyValue(keyValueToRemove: KeyValueWpp) {
         try {
             val currentAttrs = attributes
-            // Filtra comparando a referência exata da instância (=== / !==)
+            // Filters by comparing the exact instance reference (=== / !==)
             val filtered = currentAttrs.filter { it.mInstance !== keyValueToRemove.mInstance }
                 .map { it.mInstance }
 
@@ -198,7 +198,7 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
 
     /**
      * Modifica TODOS os valores de um KeyValue existente com a chave fornecida.
-     * Caso existam duplicatas, todas assumirão o novo valor.
+     * If duplicates exist, all of them take the new value.
      */
     fun modifyKeyValue(key: String, newValue: String) {
         try {
@@ -225,7 +225,7 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
     }
 
     /**
-     * Obtém o valor do primeiro KeyValue que corresponda à chave, se existir.
+     * Gets the value of the first KeyValue matching the key, if any.
      */
     fun getFirstKeyValue(key: String): String? {
         return attributes.firstOrNull { it.key == key }?.value
@@ -249,7 +249,7 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
                 try {
                     TYPE = keyValueClass
 
-                    // A classe KeyValue possui exatamente dois campos String (key e A03 que é o value)
+                    // The KeyValue class has exactly two String fields (key and A03, which is the value)
                     val stringFields = TYPE.declaredFields.filter { it.type == String::class.java }
                     if (stringFields.size >= 2) {
                         fieldKey = stringFields[0].apply { isAccessible = true }
@@ -259,7 +259,7 @@ class ProtocolTreeNodeWpp(val mInstance: Any) {
                     fieldJid = TYPE.declaredFields.first { it.type == FMessageWpp.UserJid.TYPE_JID }
                         .apply { isAccessible = true }
 
-                    // Construtor (String, String) usado para criar novas instâncias simples
+                    // (String, String) constructor used to create simple new instances
                     constructorStringString =
                         TYPE.getDeclaredConstructor(String::class.java, String::class.java).apply {
                             isAccessible = true

@@ -14,7 +14,7 @@ import java.io.File
 import java.text.DateFormat
 import java.util.Date
 
-/** Pantalla "Copias de seguridad": crear, restaurar y borrar copias de las bases de datos. */
+/** "Backups" screen: create, restore and delete database backups. */
 class BackupFlow(private val activity: Activity) {
 
     private var current: Dlg? = null
