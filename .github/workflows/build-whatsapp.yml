@@ -41,7 +41,14 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build WhatsApp Release
-        run: ./gradlew assembleWhatsappDebug -Pminify=true
+        run: |
+          set -o pipefail
+          ./gradlew assembleWhatsappDebug -Pminify=true 2>&1 | tee build.log
+
+      - name: Report compile errors
+        if: failure()
+        run: |
+          grep -E "^e: |error:|What went wrong" -A2 build.log | head -40 | while IFS= read -r line; do echo "::error::${line}"; done
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
