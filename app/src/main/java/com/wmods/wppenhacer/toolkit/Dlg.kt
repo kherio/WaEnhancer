@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.view.View
 
-/** Envoltorio mínimo sobre AlertDialog que permite configurar, crear una vez y mostrar. */
+/** Minimal AlertDialog wrapper that can be configured, created once and shown. */
 class Dlg(context: Context) {
     private val builder = AlertDialog.Builder(context)
     private var dialog: AlertDialog? = null

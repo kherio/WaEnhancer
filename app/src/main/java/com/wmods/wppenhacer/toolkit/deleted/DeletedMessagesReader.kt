@@ -4,24 +4,24 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.File
 
 /**
- * Lee de msgstore.db los mensajes que se borraron "para todos" y quién lo hizo.
+ * Reads from msgstore.db the messages that were deleted "for everyone" and who did it.
  *
- * - Chat individual: solo el autor puede borrar su mensaje para todos.
- * - Grupo: lo borra el autor o un administrador; WhatsApp guarda el administrador en
+ * - Individual chat: only the author can delete their message for everyone.
+ * - Group: the author or an admin deletes it; WhatsApp stores the admin in
  *   `message_revoked.admin_jid_row_id`.
  *
- * Los borrados "solo para mí" no dejan rastro y no se pueden detectar.
+ * Messages deleted "only for me" leave no trace and cannot be detected.
  */
 class DeletedMessagesReader(private val dbFile: File) {
 
     enum class Source {
-        /** Tabla `message_revoked` (trae la fecha del borrado y el administrador). */
+        /** `message_revoked` table (has the deletion date and the admin). */
         REVOKED_TABLE,
 
-        /** Alternativa: mensajes marcados como borrados en `message` (sin fecha ni administrador). */
+        /** Fallback: messages marked as deleted in `message` (no date or admin). */
         MESSAGE_TYPE,
 
-        /** No se encontró ningún dato de borrados. */
+        /** No deletion data was found. */
         NONE
     }
 
@@ -35,15 +35,15 @@ class DeletedMessagesReader(private val dbFile: File) {
         val fromMe: Boolean,
         /** JID del autor; null si es tuyo o no se conoce. */
         val authorJid: String?,
-        /** JID del administrador que lo borró, si no lo borró el autor. */
+        /** JID of the admin who deleted it, if the author did not. */
         val adminJid: String?,
         val sentAt: Long,
-        /** Momento del borrado, si WhatsApp lo guardó. */
+        /** Time of deletion, if WhatsApp stored it. */
         val deletedAt: Long?,
         val keyId: String? = null,
-        /** Posición del mensaje en el chat (para abrirlo en esa posición). */
+        /** Position of the message in the chat (to open it at that position). */
         val sortId: Long? = null,
-        /** Texto original, si se pudo recuperar (registro de WaImport o índice de búsqueda). */
+        /** Original text, if it could be recovered (WaImport log or search index). */
         val text: String? = null
     ) {
         val deletedByAdmin: Boolean get() = adminJid != null && adminJid != authorJid
@@ -65,7 +65,7 @@ class DeletedMessagesReader(private val dbFile: File) {
         return out
     }
 
-    /** Para los chats que WhatsApp guarda con LID: LID → teléfono del mismo contacto. */
+    /** For chats WhatsApp stores with a LID: LID -> phone number of the same contact. */
     fun phoneByLid(): Map<String, String> {
         val out = HashMap<String, String>()
         try {
@@ -86,7 +86,7 @@ class DeletedMessagesReader(private val dbFile: File) {
         return out
     }
 
-    /** Los borrados más recientes primero. */
+    /** Most recent deletions first. */
     fun list(limit: Int = 500): Result {
         if (!dbFile.exists()) return Result(emptyList(), Source.NONE)
         return openRead().use { db ->
@@ -116,7 +116,7 @@ class DeletedMessagesReader(private val dbFile: File) {
                 if (found.isNotEmpty()) return@use Result(enrich(db, found), Source.REVOKED_TABLE)
             }
 
-            // Sin tabla de borrados: mensajes marcados como "eliminado" (tipos 15 y 64).
+            // No deletions table: messages marked as "deleted" (types 15 and 64).
             val fallback = query(
                 db,
                 "SELECT m._id, m.chat_row_id, cj.raw_string, cj.server, $subject, m.from_me, " +
@@ -137,7 +137,7 @@ class DeletedMessagesReader(private val dbFile: File) {
         false
     }
 
-    /** Añade el texto original: primero el registro de WaImport y, si no, el índice de búsqueda. */
+    /** Adds the original text: first the WaImport log and, failing that, the search index. */
     private fun enrich(db: SQLiteDatabase, entries: List<Entry>): List<Entry> {
         val hasLog = tableExists(db, DeletedLog.TABLE)
         val hasFts = tableExists(db, "message_ftsv2")
@@ -172,7 +172,7 @@ class DeletedMessagesReader(private val dbFile: File) {
                     val isGroup = c.getString(3) == "g.us"
                     val fromMe = c.getInt(5) == 1
                     val senderJid = c.getString(6)
-                    // En un chat individual el autor de un mensaje recibido es el propio chat.
+                    // In an individual chat the author of a received message is the chat itself.
                     val author = when {
                         fromMe -> null
                         senderJid != null -> senderJid

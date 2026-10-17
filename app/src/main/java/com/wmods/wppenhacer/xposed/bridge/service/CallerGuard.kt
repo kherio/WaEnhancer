@@ -6,17 +6,17 @@ import android.os.Process
 import java.io.File
 
 /**
- * Controla quién puede usar el puente (HookBinder / preferencias remotas).
+ * Controls who can use the bridge (HookBinder / remote preferences).
  *
- * Solo se aceptan llamadas del propio módulo y de WhatsApp / WhatsApp Business.
+ * Only calls from the module itself and from WhatsApp / WhatsApp Business are accepted.
  * Cualquier otra app instalada queda rechazada, aunque el servicio y los providers
- * estén exportados (necesario para que el proceso hookeado pueda alcanzarlos).
+ * are exported (needed so the hooked process can reach them).
  */
 object CallerGuard {
 
     private val ALLOWED_PACKAGES = arrayOf("com.whatsapp", "com.whatsapp.w4b")
 
-    // Raíces de almacenamiento compartido permitidas (tras canonicalizar la ruta).
+    // Allowed shared-storage roots (after canonicalizing the path).
     private val ALLOWED_PATH_ROOTS = arrayOf(
         "/storage/",
         "/mnt/user/",
@@ -26,7 +26,7 @@ object CallerGuard {
         "/mnt/sdcard/"
     )
 
-    /** True si el UID de la transacción en curso es el del módulo o el de WhatsApp. */
+    /** True if the UID of the current transaction is the module's or WhatsApp's. */
     @Suppress("DEPRECATION")
     fun isCallerAllowed(context: Context?): Boolean {
         val callingUid = Binder.getCallingUid()
@@ -42,10 +42,10 @@ object CallerGuard {
     }
 
     /**
-     * Resuelve [path] a su forma canónica (sin "..", ni enlaces simbólicos) y solo la
+     * Resolves [path] to its canonical form (no "..", no symlinks) and only
      * devuelve si cae en almacenamiento compartido. Rutas privadas (/data/...) o del
-     * sistema se rechazan, de modo que el puente no exponga datos de otras apps ni
-     * los del propio módulo.
+     * system are rejected, so the bridge does not expose other apps' data or
+     * the module's own.
      */
     fun resolveSharedPath(path: String): File? {
         if (path.isEmpty() || path.indexOf('\u0000') >= 0) return null

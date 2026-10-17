@@ -385,7 +385,7 @@ class MessageHistoryStore private constructor(context: Context) {
                     val message = MessageSeenItem(jid, entity.messageId, viewed)
                     messages.add(message)
 
-                    // Alimenta também o cache individual
+                    // Also feeds the individual cache
                     val msgCacheKey = createSeenMessageCacheKey(jid, entity.messageId, type)
                     seenMessageCache.put(msgCacheKey, message)
                 }

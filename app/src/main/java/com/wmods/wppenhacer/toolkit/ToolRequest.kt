@@ -3,9 +3,9 @@ package com.wmods.wppenhacer.toolkit
 import android.content.Context
 
 /**
- * Puente entre la app del módulo y WhatsApp: la app del módulo anota qué herramienta quiere
- * abrir y lanza WhatsApp; la función Toolkit, ya dentro de WhatsApp, recoge la petición
- * (a través de PrefsProvider) y abre la herramienta. Las peticiones caducan a los 2 minutos.
+ * Bridge between the module app and WhatsApp: the module app records which tool it wants to
+ * open and launches WhatsApp; the Toolkit feature, already inside WhatsApp, picks up the request
+ * (through PrefsProvider) and opens the tool. Requests expire after 2 minutes.
  */
 object ToolRequest {
     const val IMPORT = "import"
@@ -21,7 +21,7 @@ object ToolRequest {
     private const val MAX_AGE_MS = 120_000L
     private val KNOWN = setOf(IMPORT, EXPORT, DELETED, RECOVER, BACKUP)
 
-    /** Guarda la petición para [pkg] (WhatsApp o Business) y lanza esa app. */
+    /** Stores the request for [pkg] (WhatsApp or Business) and launches that app. */
     fun request(context: Context, tool: String, pkg: String): Boolean {
         if (tool !in KNOWN) return false
         val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: return false
@@ -35,7 +35,7 @@ object ToolRequest {
         return true
     }
 
-    /** Devuelve y borra la petición pendiente para [pkg]; null si no hay o ha caducado. */
+    /** Returns and clears the pending request for [pkg]; null if there is none or it expired. */
     fun take(context: Context, pkg: String): String? {
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         val tool = prefs.getString(KEY_TOOL, null) ?: return null

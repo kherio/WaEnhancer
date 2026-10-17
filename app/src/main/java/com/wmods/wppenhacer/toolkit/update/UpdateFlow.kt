@@ -13,8 +13,8 @@ import com.wmods.wppenhacer.toolkit.S
 import java.io.File
 
 /**
- * "Buscar actualizaciones": consulta la última release en GitHub, descarga el APK desde el propio
- * módulo y lo instala: directamente con root, o abriendo el instalador del sistema si no hay root.
+ * "Check for updates": queries the latest release on GitHub, downloads the APK from within the
+ * module and installs it: directly with root, or by opening the system installer if there is no root.
  */
 class UpdateFlow(private val activity: Activity) {
 
@@ -57,7 +57,7 @@ class UpdateFlow(private val activity: Activity) {
                 Updater.downloadTo(rel.apkUrl, file)
                 val res = Updater.installWithRoot(file)
                 if (res == null) {
-                    // Sin root: se abre el instalador del sistema con el APK ya descargado.
+                    // Without root: the system installer is opened with the already downloaded APK.
                     activity.runOnUiThread { installWithSystemInstaller(file) }
                     return@Thread
                 }
@@ -84,7 +84,7 @@ class UpdateFlow(private val activity: Activity) {
         }.start()
     }
 
-    /** Sin root: pide el permiso de instalar apps desconocidas si falta y abre el instalador del sistema. */
+    /** Without root: asks for the install-unknown-apps permission if missing and opens the system installer. */
     private fun installWithSystemInstaller(file: File) {
         try {
             if (!activity.packageManager.canRequestPackageInstalls()) {

@@ -1,6 +1,6 @@
 package com.wmods.wppenhacer.toolkit
 
-/** Textos del módulo (inglés y español). Se usan en vez de recursos porque el código corre dentro de WhatsApp. */
+/** Module texts (English and Spanish). Used instead of resources because the code runs inside WhatsApp. */
 object S {
     const val import_chat = 0
     const val import_chat_reading = 1

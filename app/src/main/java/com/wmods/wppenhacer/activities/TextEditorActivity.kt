@@ -95,7 +95,7 @@ class TextEditorActivity : BaseActivity() {
             try {
                 assets.open("css_editor.html").use { inputStream ->
                     var code = IOUtils.toString(inputStream)
-                    // El contenido va dentro de un <textarea>: se escapa para que un CSS
+                    // The content goes inside a <textarea>: it is escaped so that a CSS
                     // (p. ej. un tema ajeno) no pueda cerrarlo e inyectar HTML/JS.
                     val safeContent = newContent
                         .replace("&", "&amp;")

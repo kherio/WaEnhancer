@@ -37,7 +37,7 @@ class AboutActivity : BaseActivity() {
         val binding = ActivityAboutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // El grupo de Telegram es de Dev4Mod: el botón se oculta.
+        // The Telegram group belongs to Dev4Mod: the button is hidden.
         binding.btnTelegram.visibility = android.view.View.GONE
         binding.btnGithub.setOnClickListener { openUrl("https://github.com/kherio/WaToolkit") }
 

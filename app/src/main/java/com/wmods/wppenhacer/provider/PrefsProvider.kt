@@ -21,8 +21,8 @@ class PrefsProvider : ContentProvider() {
             return Bundle().apply { putString(KEY_TOOL, tool) }
         }
         if (method != METHOD_GET_ALL) return null
-        // Provider exportado: solo el módulo y WhatsApp/WhatsApp Business pueden leer
-        // las preferencias (incluyen claves de API de transcripción).
+        // Exported provider: only the module and WhatsApp/WhatsApp Business can read
+        // the preferences (they include transcription API keys).
         if (!CallerGuard.isCallerAllowed(context)) return null
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 

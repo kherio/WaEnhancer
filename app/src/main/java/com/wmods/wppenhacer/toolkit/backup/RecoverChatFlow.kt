@@ -24,7 +24,7 @@ import java.util.Locale
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** Herramienta "Recuperar chat": elige una copia antigua, un chat de ella y trae los mensajes que faltan. */
+/** "Recover chat" tool: pick an old backup and a chat in it, and bring back the missing messages. */
 class RecoverChatFlow(private val activity: Activity) {
 
     private class Source(val label: String, val file: File)
@@ -48,7 +48,7 @@ class RecoverChatFlow(private val activity: Activity) {
             }
         } catch (_: Throwable) {
         }
-        // Copias que hace el importador antes de importar un chat.
+        // Backups the importer makes before importing a chat.
         File(dataDir, "databases").listFiles { f -> f.name.startsWith("msgstore.db.pre-import-") && f.name.endsWith(".bak") }
             ?.sortedByDescending { it.name }?.forEach {
                 sources += Source(df.format(Date(it.lastModified())) + "  ·  " + S.get(S.recover_source_preimport), it)
@@ -184,7 +184,7 @@ class RecoverChatFlow(private val activity: Activity) {
         dlg.show()
         Thread {
             try {
-                // Copia previa del estado actual, por si hay que deshacer.
+                // Backup of the current state, in case it has to be undone.
                 DbBackup(dataDir, Host.backupRoot(activity)).create(safety = true)
                 val r = recovery.recover(src.file, row.chat.rowId, { done, total ->
                     ui {

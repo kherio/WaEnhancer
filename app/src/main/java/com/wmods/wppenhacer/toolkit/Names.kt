@@ -2,7 +2,7 @@ package com.wmods.wppenhacer.toolkit
 
 import android.content.Context
 
-/** Resuelve JID → nombre: agenda de WhatsApp, agenda del teléfono o el número. */
+/** Resolves JID -> name: WhatsApp contacts, phone contacts or the number. */
 class Names(
     private val context: Context?,
     private val waNames: Map<String, String>,

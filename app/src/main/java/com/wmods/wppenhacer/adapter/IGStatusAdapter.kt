@@ -102,7 +102,7 @@ class IGStatusAdapter(context: Context, private val statusInfoClazz: Class<*>) :
                     dialog.dismissDialog()
                 }
 
-                // Botão da camera
+                // Camera button
                 val iconCamera = getDrawable(R.drawable.camera)
                 coloredDrawable(iconCamera, if (isNightMode()) Color.WHITE else Color.BLACK)
                 tabdialog.addTab(
@@ -126,7 +126,7 @@ class IGStatusAdapter(context: Context, private val statusInfoClazz: Class<*>) :
                     }
                     dialog.dismissDialog()
                 }
-                // Botão de editar
+                // Edit button
                 val iconEdit = getDrawable(R.drawable.edit2)
                 coloredDrawable(iconEdit, if (isNightMode()) Color.WHITE else Color.BLACK)
 

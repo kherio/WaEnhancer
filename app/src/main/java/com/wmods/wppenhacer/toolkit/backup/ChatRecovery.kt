@@ -10,11 +10,11 @@ import java.util.Locale
 import java.util.concurrent.CancellationException
 
 /**
- * Recupera un chat (o solo los mensajes que faltan) desde una copia antigua de msgstore.db.
+ * Recovers a chat (or only its missing messages) from an old msgstore.db backup.
  *
- * Se copian a la base actual los mensajes de la copia que ya no están (se comparan por key_id),
- * con sus adjuntos (si el archivo sigue en el teléfono), miniaturas y ubicación. Si el chat ya no
- * existe, se crea vacío antes.
+ * Messages from the backup that are no longer present (compared by key_id) are copied into the current database,
+ * with their attachments (if the file is still on the phone), thumbnails and location. If the chat no longer
+ * exists, it is created empty first.
  */
 class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
 
@@ -90,12 +90,12 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
                     "(SELECT COUNT(*) FROM message m WHERE m.chat_row_id = c._id) " +
                     "FROM chat c JOIN jid j ON j._id = c.jid_row_id WHERE c._id = ?", arrayOf(rowId.toString())
         ).use { c ->
-            if (!c.moveToFirst()) throw IllegalArgumentException("El chat no existe en la copia")
+            if (!c.moveToFirst()) throw IllegalArgumentException("The chat does not exist in the backup")
             return BackupChat(c.getLong(0), c.getString(1) ?: "", c.getString(2) == "g.us", c.getString(3), c.getInt(4))
         }
     }
 
-    /** JID del chat más los equivalentes (número ↔ LID) según el jid_map de ambas bases. */
+    /** Chat JID plus its equivalents (number <-> LID) according to the jid_map of both databases. */
     private fun jidCandidates(raw: String, vararg dbs: SQLiteDatabase): List<String> {
         val out = linkedSetOf(raw)
         for (db in dbs) {
@@ -128,7 +128,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
 
     // ------------------------------------------------------------------ consulta
 
-    /** Chats de la copia con mensajes, del más al menos reciente. */
+    /** Chats in the backup that have messages, from most to least recent. */
     fun listChats(backupDb: File): List<BackupChat> = openRead(backupDb).use { db ->
         val cols = columnsOf(db, "chat").map { it.name }.toSet()
         val order = if ("sort_timestamp" in cols) "ORDER BY c.sort_timestamp DESC" else ""
@@ -149,7 +149,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
 
     private class Pending(val ids: LongArray, val timestamps: LongArray)
 
-    /** Mensajes de la copia que no están en el chat actual. */
+    /** Messages in the backup that are not in the current chat. */
     private fun missing(bdb: SQLiteDatabase, cur: SQLiteDatabase, backupChat: Long, currentChat: Long?): Pending {
         val present = HashSet<String>()
         if (currentChat != null) {
@@ -183,7 +183,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
         }
     }
 
-    // ------------------------------------------------------------------ recuperación
+    // ------------------------------------------------------------------ recovery
 
     fun recover(
         backupDb: File,
@@ -239,7 +239,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
         val n = pending.ids.size
         if (n == 0) return Result(0, 0, created)
 
-        // Mensajes actuales del chat (para colocar los recuperados en su sitio) y sort_id globales.
+        // Current messages of the chat (to place the recovered ones correctly) and global sort_ids.
         val curTs = ArrayList<Long>()
         val curSort = ArrayList<Long>()
         if (hasSort) {
@@ -354,7 +354,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
                         }
                     }
                 }
-                // Índice de búsqueda
+                // Search index
                 val text = cv.get("text_data") as? String
                 if (ftsEnabled && !text.isNullOrEmpty()) {
                     try {
@@ -379,7 +379,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
         return Result(restored, mediaMissing, created)
     }
 
-    /** Fila de `jid` en la base actual equivalente a la de la copia (se crea si no existe). */
+    /** `jid` row in the current database equivalent to the one in the backup (created if missing). */
     private fun mapJid(ctx: Ctx, backupRow: Long): Long = ctx.jidCache.getOrPut(backupRow) {
         var raw: String? = null
         var user: String? = null
@@ -405,7 +405,7 @@ class ChatRecovery(private val currentDb: File, private val mediaRoot: File) {
         ctx.db.insertOrThrow("jid", null, cv)
     }
 
-    /** Si el chat estaba vacío, apunta su "último mensaje" a lo recuperado. */
+    /** If the chat was empty, points its "last message" to the recovered data. */
     private fun updateChat(db: SQLiteDatabase, chatRow: Long, lastRow: Long, lastSort: Long?, lastTs: Long) {
         val names = columnsOf(db, "chat").map { it.name }.toSet()
         val cv = ContentValues()

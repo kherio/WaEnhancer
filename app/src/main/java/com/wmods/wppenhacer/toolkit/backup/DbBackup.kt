@@ -10,14 +10,14 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Copias de seguridad de las bases de datos de WhatsApp (msgstore.db y wa.db).
+ * Backups of the WhatsApp databases (msgstore.db and wa.db).
  *
  * Cada copia es una carpeta `yyyyMMdd-HHmmss[-prerestore]` dentro de [backupRoot].
- * Restaurar sustituye los archivos por renombrado atómico: la base abierta por WhatsApp
- * queda apuntando al archivo viejo, así que no puede estropear la restaurada.
+ * Restoring replaces the files by atomic rename: the database WhatsApp has open
+ * keeps pointing to the old file, so it cannot corrupt the restored one.
  */
 class DbBackup(
-    /** Carpeta de datos de la cuenta (la que contiene "databases/"). */
+    /** Account data folder (the one that contains "databases/"). */
     private val dataDir: File,
     private val backupRoot: File,
     private val keep: Int = 8
@@ -67,8 +67,8 @@ class DbBackup(
     }
 
     /**
-     * Restaura [b]. Antes hace una copia de seguridad del estado actual (devuelta) por si
-     * hay que deshacerlo. Después hay que reiniciar WhatsApp.
+     * Restores [b]. First it backs up the current state (returned) in case
+     * it has to be undone. WhatsApp must be restarted afterwards.
      */
     fun restore(b: Backup, includeWaDb: Boolean = true): Backup {
         val src = File(b.dir, "msgstore.db")
@@ -91,7 +91,7 @@ class DbBackup(
             stage.delete()
             throw e
         }
-        // El WAL y los archivos de memoria compartida pertenecen a la base anterior.
+        // The WAL and shared-memory files belong to the previous database.
         for (suffix in listOf("-wal", "-shm", "-journal")) File(target.path + suffix).delete()
     }
 

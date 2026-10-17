@@ -14,7 +14,7 @@ val gitHash: String = providers.exec {
     isIgnoreExitValue = true
 }.standardOutput.asText.map { it.trim().uppercase(Locale.getDefault()).substring(0,8) }.getOrElse("UNKNOWN")
 
-// Versión base. Las releases automáticas suben el último número (1.6.1 -> 1.6.2 ...) pasando -PappVersion.
+// Base version. Automatic releases bump the last number (1.6.1 -> 1.6.2 ...) by passing -PappVersion.
 val baseVersion = "1.6.1"
 val appVersion: String = (project.findProperty("appVersion") as String?)?.takeIf { it.isNotBlank() } ?: baseVersion
 val appVersionCode: Int = appVersion.split(".").map { it.toIntOrNull() ?: 0 }.let { p ->
@@ -58,7 +58,7 @@ android {
             }
         }
 
-        // Clave fija para que las builds de CI se puedan instalar unas encima de otras (actualizaciones).
+        // Fixed key so CI builds can be installed over each other (updates).
         signingConfigs.create("stable") {
             storeFile = rootProject.file("app/signing/watoolkit-debug.jks")
             storePassword = "android"
@@ -174,6 +174,7 @@ kotlin {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
     implementation(libs.colorpicker)
     implementation(files("libs/dexkit-android.aar"))
     implementation(libs.flatbuffers)

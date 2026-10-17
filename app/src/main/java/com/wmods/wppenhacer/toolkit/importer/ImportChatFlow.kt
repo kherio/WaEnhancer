@@ -32,17 +32,17 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Flujo de importación desde la interfaz de WhatsApp: lee el archivo elegido, pide el chat de
- * destino y quién eres tú, e importa con barra de progreso.
+ * Import flow from the WhatsApp UI: reads the chosen file, asks for the destination
+ * chat and who you are, and imports with a progress bar.
  */
 class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
 
     private class ChatChoice(
         val info: ChatImporter.ChatInfo?,
         val name: String,
-        /** Texto que se muestra en las listas. */
+        /** Text shown in the lists. */
         val label: String = name,
-        /** JID del contacto cuando aún no tiene chat (se crea al importar). */
+        /** Contact JID when it has no chat yet (created on import). */
         val newJid: String? = null
     ) {
         val isGroup: Boolean get() = info?.isGroup == true
@@ -53,11 +53,11 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
     private var chats: List<ChatChoice> = emptyList()
     private var fileName: String? = null
 
-    // Estado de las opciones; se conserva si el diálogo se vuelve a mostrar.
+    // Options state; kept if the dialog is shown again.
     private var selectedChat: ChatChoice? = null
     private var newChatMode = false
     private var meIndex = 0
-    private var orderChoice = 0 // 0 automático, 1 día/mes, 2 mes/día
+    private var orderChoice = 0 // 0 automatic, 1 day/month, 2 month/day
     private var importMedia = true
     private var backup = true
 
@@ -111,7 +111,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
         null
     }
 
-    /** Borra importaciones anteriores que quedaron a medias (p. ej. si se cerró WhatsApp). */
+    /** Removes earlier imports that were left half-done (e.g. if WhatsApp was closed). */
     private fun cleanOldWorkDirs() {
         try {
             val limit = System.currentTimeMillis() - 60 * 60 * 1000
@@ -131,7 +131,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
 
     // ------------------------------------------------------------------ nombres de chats
 
-    /** Contactos sin chat: de la agenda de WhatsApp (wa.db) o, si no hay, de la del teléfono. */
+    /** Contacts without a chat: from the WhatsApp address book (wa.db) or, if none, from the phone's. */
     private fun loadNewContacts(): List<ChatChoice> {
         val imp = importer()
         var contacts = try {
@@ -158,10 +158,10 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
             val subject = info.subject?.takeIf { it.isNotBlank() } ?: info.rawJid.substringBefore('@')
             return str(S.import_chat_group_suffix, subject)
         }
-        // Nombre en la agenda de WhatsApp, por el JID del chat o por el número del mismo contacto.
+        // Name in the WhatsApp address book, by the chat JID or by the number of the same contact.
         contactNames[info.rawJid]?.let { return it }
         info.phoneJid?.let { phone -> contactNames[phone]?.let { return it } }
-        // Nombre en la agenda del teléfono.
+        // Name in the phone's address book.
         val phoneDigits = (info.phoneJid ?: info.rawJid.takeIf { it.endsWith("@s.whatsapp.net") })
             ?.substringBefore('@')
         if (phoneDigits != null) {
@@ -171,13 +171,13 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
         return info.rawJid.substringBefore('@')
     }
 
-    /** Minúsculas, sin acentos y con espacios simples, para buscar y comparar nombres. */
+    /** Lowercase, without accents and with single spaces, to search and compare names. */
     private fun normalizeName(s: String): String =
         java.text.Normalizer.normalize(s.lowercase(Locale.ROOT), java.text.Normalizer.Form.NFD)
             .replace(Regex("\\p{M}+"), "")
             .replace(Regex("[\\s\u00A0\u202F]+"), " ").trim()
 
-    /** Intenta deducir el chat a partir del nombre del archivo ("Chat de WhatsApp con Ana.zip"). */
+    /** Tries to infer the chat from the file name ("WhatsApp Chat with Ana.zip"). */
     private fun guessChat(): ChatChoice? {
         val raw = fileName ?: return null
         var base = raw.substringBeforeLast('.')
@@ -198,7 +198,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
         return matches.singleOrNull()
     }
 
-    /** En un chat individual, tú eres el participante que no se llama como el contacto. */
+    /** In an individual chat, you are the participant not named like the contact. */
     private fun guessMe(chat: ParsedChat): Int {
         val other = selectedChat?.takeIf { !it.isGroup }?.name ?: return 0
         if (chat.speakers.size != 2) return 0
@@ -276,7 +276,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
             refreshChatButton()
         }
 
-        // Quién eres tú
+        // Who you are
         root.addView(label(str(S.import_chat_me)))
         val meSpinner = Spinner(activity)
         meSpinner.adapter = ArrayAdapter(
@@ -399,7 +399,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
                 shown.clear()
                 shown.addAll(pool.filter { q.isEmpty() || normalizeName(it.name).contains(q) })
                 if (newChatMode) {
-                    // Un número escrito a mano sirve aunque no esté en la agenda.
+                    // A number typed by hand works even if it is not in the address book.
                     val digits = raw.filter { it.isDigit() }
                     if (digits.length in 7..15 && raw.all { it.isDigit() || it in "+ -()" }) {
                         shown.add(0, ChatChoice(null, "+$digits", str(S.import_chat_use_number, digits), "$digits@s.whatsapp.net"))
@@ -506,7 +506,7 @@ class ImportChatFlow(private val activity: Activity, private val uri: Uri) {
             .show()
     }
 
-    /** Diálogo de progreso con botón de cancelar opcional. */
+    /** Progress dialog with an optional cancel button. */
     private inner class ProgressUi(text: String, cancelable: Boolean) {
         private val label = TextView(activity).apply {
             this.text = text
