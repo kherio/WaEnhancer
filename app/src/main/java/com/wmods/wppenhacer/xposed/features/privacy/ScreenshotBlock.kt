@@ -118,8 +118,8 @@ class ScreenshotBlock(
     @SuppressLint("ResourceType")
     private fun addInfoItem(activity: Activity, isChat: Boolean) {
         if (activity.findViewById<View>(ITEM_ID) != null) return
-        val id = Utils.getID("contact_info_security_card_layout", "id")
-        val infoLayout = activity.window.findViewById<ViewGroup>(id) ?: return
+        val layoutId = Utils.getID("contact_info_security_card_layout", "id")
+        val infoLayout = activity.window.findViewById<ViewGroup>(layoutId) ?: return
         val jid = FMessageWpp.UserJid(
             ReflectionUtils.callMethod(if (isChat) chatUserJidMethod else groupUserJidMethod, activity)
         )
