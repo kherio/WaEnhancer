@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.text.InputType
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import com.wmods.wppenhacer.R
 import com.wmods.wppenhacer.preference.ContactPickerPreference
@@ -13,6 +15,9 @@ class PrivacyFragment : BasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         super.onCreatePreferences(savedInstanceState, rootKey)
         setPreferencesFromResource(R.xml.fragment_privacy, rootKey)
+        findPreference<EditTextPreference>("auto_backup_password")?.setOnBindEditTextListener {
+            it.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
     }
 
     override fun onResume() {

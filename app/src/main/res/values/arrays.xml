@@ -242,4 +242,23 @@
         <item>2</item>
         <item>6</item>
     </string-array>
+
+    <string-array name="auto_backup_interval_entries">
+        <item>@string/auto_backup_every_12h</item>
+        <item>@string/auto_backup_every_day</item>
+        <item>@string/auto_backup_every_3_days</item>
+        <item>@string/auto_backup_every_week</item>
+    </string-array>
+    <string-array name="auto_backup_interval_values">
+        <item>12</item>
+        <item>24</item>
+        <item>72</item>
+        <item>168</item>
+    </string-array>
+    <string-array name="auto_backup_keep_values">
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
 </resources>

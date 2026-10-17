@@ -1,7 +1,13 @@
 package com.wmods.wppenhacer.ui.fragments
 
 import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
+import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
+import com.wmods.wppenhacer.R
+import com.wmods.wppenhacer.toolkit.backup.BackupCrypto
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +27,18 @@ import com.wmods.wppenhacer.toolkit.update.UpdateFlow
  * ejecuta aquí mismo.
  */
 class ToolsFragment : Fragment() {
+
+    private var pendingBackup: Uri? = null
+    private var pendingPassword: CharArray? = null
+
+    private val pickBackup = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) askPassword(uri)
+    }
+    private val createZip = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { target ->
+        if (target != null) decrypt(target)
+    }
 
     private class Tool(val icon: String, val title: String, val desc: String, val action: () -> Unit)
 
@@ -48,6 +66,9 @@ class ToolsFragment : Fragment() {
             Tool("🗑", S.get(S.deleted_menu), S.get(S.tool_deleted_desc)) { open(ToolRequest.DELETED) },
             Tool("♻️", S.get(S.recover_menu), S.get(S.tool_recover_desc)) { open(ToolRequest.RECOVER) },
             Tool("💾", S.get(S.backup_menu), S.get(S.tool_backup_desc)) { open(ToolRequest.BACKUP) },
+            Tool("🔓", getString(R.string.decrypt_backup), getString(R.string.decrypt_backup_desc)) {
+                pickBackup.launch(arrayOf("*/*"))
+            },
             Tool("⬇", S.get(S.update_menu), S.get(S.tool_update_desc)) {
                 UpdateFlow(requireActivity()).start()
             }
@@ -115,5 +136,46 @@ class ToolsFragment : Fragment() {
         if (!ToolRequest.request(requireContext(), tool, pkg)) {
             Toast.makeText(requireContext(), "WhatsApp", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun askPassword(source: Uri) {
+        val ctx = requireContext()
+        val input = EditText(ctx).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            hint = getString(R.string.decrypt_backup_password)
+        }
+        AlertDialog.Builder(ctx)
+            .setTitle(R.string.decrypt_backup)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                pendingBackup = source
+                pendingPassword = input.text.toString().toCharArray()
+                createZip.launch("WaToolkit-backup.zip")
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun decrypt(target: Uri) {
+        val source = pendingBackup ?: return
+        val password = pendingPassword ?: return
+        pendingBackup = null
+        pendingPassword = null
+        val ctx = requireContext().applicationContext
+        Thread {
+            val message = try {
+                ctx.contentResolver.openInputStream(source)!!.use { input ->
+                    ctx.contentResolver.openOutputStream(target, "wt")!!.use { out ->
+                        BackupCrypto.decrypt(input.buffered(), out.buffered(), password)
+                    }
+                }
+                ctx.getString(R.string.decrypt_backup_done)
+            } catch (_: BackupCrypto.WrongPasswordException) {
+                ctx.getString(R.string.decrypt_backup_wrong)
+            } catch (e: Throwable) {
+                ctx.getString(R.string.decrypt_backup_failed, e.message ?: e.javaClass.simpleName)
+            }
+            activity?.runOnUiThread { Toast.makeText(ctx, message, Toast.LENGTH_LONG).show() }
+        }.start()
     }
 }

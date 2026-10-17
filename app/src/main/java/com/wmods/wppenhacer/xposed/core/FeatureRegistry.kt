@@ -37,6 +37,7 @@ import com.wmods.wppenhacer.xposed.features.media.MediaQuality
 import com.wmods.wppenhacer.xposed.features.media.StatusDownload
 import com.wmods.wppenhacer.xposed.features.others.ActivityController
 import com.wmods.wppenhacer.xposed.features.others.AudioTranscript
+import com.wmods.wppenhacer.xposed.features.others.AutoBackup
 import com.wmods.wppenhacer.xposed.features.others.BackupRestore
 import com.wmods.wppenhacer.xposed.features.others.Channels
 import com.wmods.wppenhacer.xposed.features.others.ChatFilters
@@ -127,6 +128,7 @@ internal object FeatureRegistry {
         CustomPrivacy::class.java,
         ScreenshotBlock::class.java,
         MetadataStrip::class.java,
+        AutoBackup::class.java,
         AudioTranscript::class.java,
         GoogleTranslate::class.java,
         ContactVerify::class.java,
