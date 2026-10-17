@@ -40,6 +40,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          ./gradlew testWhatsappDebugUnitTest 2>&1 | tee build.log
+
       - name: Build WhatsApp Release
         run: |
           set -o pipefail
@@ -48,7 +53,7 @@ jobs:
       - name: Report compile errors
         if: failure()
         run: |
-          grep -E "^e: |error:|What went wrong" -A2 build.log | head -40 | while IFS= read -r line; do echo "::error::${line}"; done
+          grep -E "^e: |error:|What went wrong|FAILED|AssertionError|Exception" -A2 build.log | head -40 | while IFS= read -r line; do echo "::error::${line}"; done
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
