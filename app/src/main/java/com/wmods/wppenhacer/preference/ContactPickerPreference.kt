@@ -39,6 +39,7 @@ class ContactPickerPreference : Preference, Preference.OnPreferenceClickListener
         val selectedContacts = contacts?.let(::ArrayList) ?: arrayListOf()
         val installedPackages = WhatsAppContactPickerLauncher.getInstalledWhatsAppPackages(context)
         when (installedPackages.size) {
+            0 -> Utils.showToast("WhatsApp is not installed", 1)
             1 -> startSelectContacts(installedPackages[0], preferenceKey, selectedContacts)
             in 2..Int.MAX_VALUE -> showPackageSelectionDialog(
                 installedPackages,

@@ -274,26 +274,10 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         val filtergroups = prefs.getBoolean("filtergroups", false)
         setPreferenceState("separategroups", !filtergroups)
 
-        val callBlockContacts = findPreference<Preference>("call_block_contacts")
-        val callWhiteContacts = findPreference<Preference>("call_white_contacts")
-        if (callBlockContacts != null && callWhiteContacts != null) {
-            when (prefs.getString("call_privacy", "0")!!.toInt()) {
-                3 -> {
-                    callBlockContacts.isEnabled = true
-                    callWhiteContacts.isEnabled = false
-                }
-
-                4 -> {
-                    callWhiteContacts.isEnabled = true
-                    callBlockContacts.isEnabled = false
-                }
-
-                else -> {
-                    callWhiteContacts.isEnabled = false
-                    callBlockContacts.isEnabled = false
-                }
-            }
-        }
+        // Both contact lists stay selectable at any time; CallPrivacy only applies the one
+        // matching the chosen call-blocking mode.
+        findPreference<Preference>("call_block_contacts")?.isEnabled = true
+        findPreference<Preference>("call_white_contacts")?.isEnabled = true
     }
 
     fun setDisplayHomeAsUpEnabled(enabled: Boolean) {
