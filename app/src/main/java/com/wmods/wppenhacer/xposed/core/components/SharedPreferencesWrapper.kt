@@ -111,6 +111,9 @@ class SharedPreferencesWrapper(private val mPreferences: SharedPreferences) : Sh
 
                 for (sharedPreferencesClass in sharedPreferencesClasses) {
                     if (SharedPreferencesWrapper::class.java.name == sharedPreferencesClass.name) continue
+                    // En WhatsApp 2.26.41+ aparece una interfaz que solo hereda de SharedPreferences: no tiene métodos propios que enganchar.
+                    if (sharedPreferencesClass.isInterface) continue
+                    val declared = sharedPreferencesClass.declaredMethods.map { it.name }.toSet()
                     for (methodName in listOf(
                         "getString",
                         "getStringSet",
@@ -120,13 +123,16 @@ class SharedPreferencesWrapper(private val mPreferences: SharedPreferences) : Sh
                         "getBoolean",
                         "contains"
                     )) {
+                        if (methodName !in declared) continue
                         sharedPreferencesClass.resolve().method {
                             name = methodName
                         }.hookAll { after(applyKeyHook) }
                     }
-                    sharedPreferencesClass.resolve().method {
-                        name = "getAll"
-                    }.hookAll { after(getAllHook) }
+                    if ("getAll" in declared) {
+                        sharedPreferencesClass.resolve().method {
+                            name = "getAll"
+                        }.hookAll { after(getAllHook) }
+                    }
                 }
             }
         }
